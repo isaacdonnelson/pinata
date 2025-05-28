@@ -4,7 +4,6 @@ const https = require("https");
 const path = require("path");
 const port = process.env.VUE_APP_SERVER_PORT || 64064;
 
-
 const clientId = process.env.clientId;
 const clientSecret = process.env.clientSecret;
 const serverURL = process.env.url;
@@ -29,7 +28,6 @@ module.exports = (app) => {
     return res.send(uri);
   });
 
-
   app.get("/oauth2/atlassian/callback", (req, res) => {
     var uri = encodeURI(
       `https://${serverURL}/rest/oauth2/latest/token?client_id=${clientId}&client_secret=${clientSecret}&code=${req.query.code}&grant_type=authorization_code&redirect_uri=${redirectURL}&code_verifier=${codeVerifier}`
@@ -45,21 +43,20 @@ module.exports = (app) => {
       .post(uri)
       .then((data) => {
         const responseData = {};
-        for(const [key, value] of Object.entries(data.data)) {
-            // Convert keys to camel case.
-            const newKey = key.toLowerCase().replace(/([-_][a-z0-9])/g, group =>
-              group
-               .toUpperCase()
-               .replace('-', '')
-               .replace('_', '')
+        for (const [key, value] of Object.entries(data.data)) {
+          // Convert keys to camel case.
+          const newKey = key
+            .toLowerCase()
+            .replace(/([-_][a-z0-9])/g, (group) =>
+              group.toUpperCase().replace("-", "").replace("_", "")
             );
-            responseData[newKey] = value;
+          responseData[newKey] = value;
         }
         responseData.type = "oauth";
         responseData.url = serverURL;
         responseData.clientId = clientId;
         responseData.clientSecret = clientSecret;
-  
+
         process.send({
           type: "jira",
           data: {
@@ -70,8 +67,14 @@ module.exports = (app) => {
       })
       .catch((error) => {
         console.log(`Connection error: ${JSON.stringify(error)}`);
-        return res.sendFile(path.join(__dirname, `../jira_error.html?code=${error.response.status}&message=${encodeURI(error.message)}`));
+        return res.sendFile(
+          path.join(
+            __dirname,
+            `../jira_error.html?code=${
+              error.response.status
+            }&message=${encodeURI(error.message)}`
+          )
+        );
       });
   });
-
 };

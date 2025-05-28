@@ -1,22 +1,12 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import store from "@/store";
 
 import HomeView from "../views/HomeView.vue";
 import MainView from "../views/MainView.vue";
 import ResultView from "../views/ResultView.vue";
 import PrintView from "../views/PrintView.vue";
 import LowProfileView from "../views/LowProfileView.vue";
-
-import AuthenticationView from "../views/AuthenticationView.vue";
-import SignupMainWrapper from "@/components/authentication/SignupMainWrapper";
-import SignupPinataWrapper from "@/components/authentication/SignupPinataWrapper";
-import SigninWrapper from "@/components/authentication/SigninWrapper";
-import SigninTestfiestaWrapper from "@/components/authentication/SigninTestfiestaWrapper";
-import SigninJiraWrapper from "@/components/authentication/SigninJiraWrapper";
-import SigninTestRailWrapper from "@/components/authentication/SigninTestRailWrapper";
-import SigninXrayWrapper from "@/components/authentication/SigninXrayWrapper";
-import SigninZephyrSquadWrapper from "@/components/authentication/SigninZephyrSquadWrapper";
-import SigninZephyrScaleWrapper from "@/components/authentication/SigninZephyrScaleWrapper";
 
 import SettingView from "../views/SettingView.vue";
 import ConnectionsTab from "@/components/settings/ConnectionsTab.vue";
@@ -29,75 +19,101 @@ import AddonsTab from "@/components/settings/AddonsTab.vue";
 import HotkeysTab from "@/components/settings/HotkeysTab.vue";
 import TagsTab from "@/components/settings/TagsTab.vue";
 
-import store from "@/store";
+// Auth views
+import LoginPage from "@/components/auth/views/LoginPage.vue";
+import RegisterPage from "@/components/auth/views/RegisterPage.vue";
+import ForgotPasswordPage from "@/components/auth/views/ForgotPasswordPage.vue";
+import ResetPasswordPage from "@/components/auth/views/ResetPasswordPage.vue";
+import ContinueWithSSOPage from "@/components/auth/views/NonExistingUserInvitePage.vue";
+import ExistingUserInvitePage from "@/components/auth/views/ExistingUserInvitePage.vue";
+import EmailConfirmationPage from "@/components/auth/views/EmailConfirmationPage.vue";
+import CreatePasswordPage from "@/components/auth/views/CreatePasswordPage.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "home",
+    redirect: () => {
+      return process.env.IS_ELECTRON ? "/login" : "/home";
+    },
+  },
+  {
+    path: "/home",
+    name: "Home",
     component: HomeView,
   },
   {
-    path: "/authentication",
-    component: AuthenticationView,
-    children: [
-      {
-        path: "signupMain",
-        name: "signupMain",
-        component: SignupMainWrapper,
-        props: true,
-      },
-      {
-        path: "signupPinata",
-        name: "signupPinata",
-        component: SignupPinataWrapper,
-        props: true,
-      },
-      {
-        path: "signin",
-        name: "signin",
-        component: SigninWrapper,
-        props: true,
-      },
-      {
-        path: "signinTestfiesta",
-        name: "signinTestfiesta",
-        component: SigninTestfiestaWrapper,
-        props: true,
-      },
-      {
-        path: "signinJira",
-        name: "signinJira",
-        component: SigninJiraWrapper,
-        props: true,
-      },
-      {
-        path: "signinTestRail",
-        name: "signinTestRail",
-        component: SigninTestRailWrapper,
-        props: true,
-      },
-      {
-        path: "signinXray",
-        name: "signinXray",
-        component: SigninXrayWrapper,
-        props: true,
-      },
-      {
-        path: "signinZephyrSquad",
-        name: "signinZephyrSquad",
-        component: SigninZephyrSquadWrapper,
-        props: true,
-      },
-      {
-        path: "signinZephyrScale",
-        name: "signinZephyrScale",
-        component: SigninZephyrScaleWrapper,
-        props: true,
-      },
-    ],
+    path: "/login",
+    name: "Login",
+    component: LoginPage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: RegisterPage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/forgot-password",
+    name: "ForgotPassword",
+    component: ForgotPasswordPage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/reset-password",
+    name: "ResetPassword",
+    component: ResetPasswordPage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/invite/existing/:token",
+    name: "ExistingUserInvite",
+    component: ExistingUserInvitePage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/invite/:token",
+    name: "InvitationRegistration",
+    component: ContinueWithSSOPage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/email-confirmation",
+    name: "EmailConfirmation",
+    component: EmailConfirmationPage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: EmailConfirmationPage,
+    meta: {
+      public: true,
+    },
+  },
+  {
+    path: "/create-password",
+    name: "CreatePassword",
+    component: CreatePasswordPage,
+    meta: {
+      public: true,
+    },
   },
   {
     path: "/main",
@@ -187,6 +203,40 @@ const router = new VueRouter({
   mode: process.env.IS_ELECTRON ? "hash" : "history",
   base: process.env.BASE_URL,
   routes,
+});
+
+// Single beforeEach guard that handles auth
+router.beforeEach(async (to, from, next) => {
+  // Skip auth check for public routes
+  if (to.meta.public) {
+    return next();
+  }
+
+  try {
+    // Handle Electron vs Web differently
+    if (process.env.IS_ELECTRON) {
+      // Desktop version - check auth status via IPC
+      const response = await store.dispatch("auth/checkAuth");
+      if (!response.isAuthenticated) {
+        store.commit("auth/setRedirectPath", to.fullPath);
+        return next("/login");
+      }
+    } else {
+      // Web version - check auth status via API
+      const response = await store.dispatch("auth/checkAuth");
+      if (!response.isAuthenticated) {
+        store.commit("auth/setRedirectPath", to.fullPath);
+        return next("/login");
+      }
+    }
+  } catch (error) {
+    console.error("Auth check failed:", error);
+    store.commit("auth/setRedirectPath", to.fullPath);
+    return next("/login");
+  }
+
+  // Then proceed with navigation
+  next();
 });
 
 router.beforeEach((to, from, next) => {

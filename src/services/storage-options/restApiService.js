@@ -7,8 +7,47 @@ import store from "@/store";
 export default class RestApiService extends StorageInterface {
   constructor() {
     super();
-    this.baseURL =
-      process.env.VUE_APP_TESTFIESTA_API_URL || "http://localhost:5050/core";
+    this.api = axios.create({
+      baseURL: process.env.VUE_APP_API_URL || "http://localhost:5050/core",
+      withCredentials: true,
+    });
+
+    // Add request interceptor for token
+    // this.api.interceptors.request.use((config) => {
+    //   const token = localStorage.getItem("auth_token");
+    //   if (token) {
+    //     config.headers.Authorization = `Bearer ${token}`;
+    //   }
+    //   return config;
+    // });
+
+    // Add response interceptor for token refresh
+    // this.api.interceptors.response.use(
+    //   (response) => response,
+    //   async (error) => {
+    //     const originalRequest = error.config;
+    //     if (error.response?.status === 401 && !originalRequest._retry) {
+    //       originalRequest._retry = true;
+    //       try {
+    //         const refreshToken = localStorage.getItem("refresh_token");
+    //         if (!refreshToken) throw new Error("No refresh token");
+
+    //         const response = await this.api.post("/auth/refresh", {
+    //           refreshToken,
+    //         });
+    //         const { token } = response.data;
+    //         localStorage.setItem("auth_token", token);
+    //         originalRequest.headers.Authorization = `Bearer ${token}`;
+    //         return this.api(originalRequest);
+    //       } catch (refreshError) {
+    //         localStorage.removeItem("auth_token");
+    //         localStorage.removeItem("refresh_token");
+    //         throw refreshError;
+    //       }
+    //     }
+    //     throw error;
+    //   }
+    // );
   }
 
   async getState(executionId) {
@@ -514,4 +553,130 @@ export default class RestApiService extends StorageInterface {
   //   ],
   // };
   // }
+
+  handleAuthResponse(response) {
+    const { token, refreshToken, user } = response.data;
+
+    if (token) {
+      localStorage.setItem("auth_token", token);
+      if (refreshToken) {
+        localStorage.setItem("refresh_token", refreshToken);
+      }
+    }
+
+    return {
+      isAuthenticated: true,
+      user,
+      authType: response.data.authType || "token",
+    };
+  }
+
+  async login(credentials) {
+    const url = `${this.baseURL}/auth/login`;
+    try {
+      const response = await axios.post(url, credentials, {
+        withCredentials: true,
+      });
+      this.handleAuthResponse(response);
+      return response.data;
+    } catch (error) {
+      console.error("Login error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+
+  async logout() {
+    const url = `${this.baseURL}/auth/logout`;
+    try {
+      const response = await axios.post(url, {}, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      console.error("Logout error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+
+  async checkAuth() {
+    const url = `${this.baseURL}/auth/check`;
+    try {
+      const response = await axios.get(url, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      console.error("Auth check error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+
+  async register(userData) {
+    console.log("Registering user with data:", userData);
+    debugger; // For debugging purposes
+    const url = `${this.baseURL}/auth/register`;
+    try {
+      debugger;
+      const response = await axios.post(url, userData, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Registration error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+
+  async verifyEmail(token) {
+    const url = `${this.baseURL}/auth/verify-email`;
+    try {
+      const response = await axios.post(
+        url,
+        { token },
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Email verification error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+
+  async resendVerification(email) {
+    const url = `${this.baseURL}/auth/resend-verification`;
+    try {
+      const response = await axios.post(
+        url,
+        { email },
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Resend verification error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+
+  async setPassword(token, password) {
+    const url = `${this.baseURL}/auth/set-password`;
+    try {
+      const response = await axios.post(
+        url,
+        { token, password },
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Set password error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+
+  async refreshToken() {
+    const url = `${this.baseURL}/auth/refresh-token`;
+    try {
+      const response = await axios.post(url, {}, { withCredentials: true });
+      this.handleAuthResponse(response);
+      return response.data;
+    } catch (error) {
+      console.error("Token refresh error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
 }

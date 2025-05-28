@@ -134,7 +134,7 @@
                   </v-btn>
                 </template>
                 <v-list>
-                  <v-list-item link to="/authentication/signin">
+                  <v-list-item link to="/login">
                     <v-list-item-title class="fs-16 font-weight-medium">{{
                       $tc("caption.login", 1)
                     }}</v-list-item-title>

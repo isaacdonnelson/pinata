@@ -1,27 +1,54 @@
 export const auth = {
   namespaced: true,
   state: () => ({
+    user: null,
+    authType: null,
     isAuthenticated: false,
-    credentials: {},
+    loading: false,
+    error: null,
+    redirectPath: null,
+    credentials: null,
   }),
   mutations: {
-    setIsAuthenticated(state, payload) {
-      state.isAuthenticated = payload;
+    setUser(state, user) {
+      state.user = user;
+      this._vm.$storageService.register(state);
     },
-    setCredentials(state, payload) {
-      state.credentials = payload;
+    setAuthType(state, authType) {
+      state.authType = authType;
+    },
+    setIsAuthenticated(state, isAuthenticated) {
+      state.isAuthenticated = isAuthenticated;
+    },
+    setLoading(state, loading) {
+      state.loading = loading;
+    },
+    setError(state, error) {
+      state.error = error;
+    },
+    clearError(state) {
+      state.error = null;
+    },
+    clearAuth(state) {
+      state.user = null;
+      state.authType = null;
+      state.isAuthenticated = false;
+    },
+    setRedirectPath(state, path) {
+      state.redirectPath = path;
+    },
+    setCredentials(state, credentials) {
+      state.credentials = credentials;
     },
   },
   actions: {},
   getters: {
-    credentials: (state) => state.credentials,
     isAuthenticated: (state) => state.isAuthenticated,
-    loggedInServices: (state) => {
-      const services = {};
-      for (const credentialType of Object.keys(state.credentials)) {
-        services[credentialType] = state.credentials[credentialType].length > 0;
-      }
-      return services;
-    },
+    user: (state) => state.user,
+    authType: (state) => state.authType,
+    loading: (state) => state.loading,
+    error: (state) => state.error,
+    redirectPath: (state) => state.redirectPath,
+    credentials: (state) => state.credentials,
   },
 };

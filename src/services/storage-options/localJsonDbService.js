@@ -173,4 +173,63 @@ export default class LocalJsonDbService extends StorageInterface {
       data: state,
     });
   }
+
+  async login(credentials) {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.LOGIN,
+      data: credentials,
+    });
+  }
+
+  async logout() {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.LOGOUT,
+    });
+  }
+
+  async checkPERSISTENCE() {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.CHECK_PERSISTENCE,
+    });
+  }
+
+  async loginWithGoogle() {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.LOGIN_WITH_GOOGLE,
+    });
+  }
+
+  async register(userData) {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.REGISTER,
+      data: userData,
+    });
+  }
+
+  async verifyEmail(token) {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.VERIFY_EMAIL,
+      data: { token },
+    });
+  }
+
+  async resendVerification(email) {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.RESEND_VERIFICATION,
+      data: { email },
+    });
+  }
+
+  async setPassword(token, password) {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.SET_PASSWORD,
+      data: { token, password },
+    });
+  }
+
+  async refreshToken() {
+    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
+      func: IPC_FUNCTIONS.REFRESH_TOKEN,
+    });
+  }
 }

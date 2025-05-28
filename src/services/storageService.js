@@ -8,6 +8,35 @@ export default class StorageService {
       : new RestApiService();
   }
 
+  // Authentication methods
+  async login(credentials) {
+    return this.storage.login(credentials);
+  }
+
+  async logout() {
+    return this.storage.logout();
+  }
+
+  async checkAuth() {
+    return this.storage.checkAuth();
+  }
+
+  async loginWithGoogle() {
+    return this.storage.loginWithGoogle();
+  }
+
+  async register(userData) {
+    return this.storage.register(userData);
+  }
+
+  async verifyEmail(token) {
+    return this.storage.verifyEmail(token);
+  }
+
+  async resendVerification(email) {
+    return this.storage.resendVerification(email);
+  }
+
   async getState(executionId) {
     return await this.storage.getState(executionId);
   }

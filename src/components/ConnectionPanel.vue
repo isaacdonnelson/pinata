@@ -105,7 +105,7 @@
   </div>
 </template>
 <script>
-import uuidv4 from "uuid";
+// import uuidv4 from "uuid";
 import { mapGetters } from "vuex";
 import SettingsDialog from "@/components/dialogs/SettingsDialog.vue";
 
@@ -130,18 +130,18 @@ export default {
     ...mapGetters({
       credentials: "auth/credentials",
     }),
-    profileAvatar() {
-      for (const cList of Object.values(this.credentials)) {
-        if (cList.length > 0) {
-          if (cList[0].user.avatar) {
-            return cList[0].user.avatar;
-          } else {
-            return "https://www.gravatar.com/avatar/" + cList[0].user.name;
-          }
-        }
-      }
-      return "https://www.gravatar.com/avatar/" + uuidv4();
-    },
+    // profileAvatar() {
+    //   for (const cList of Object.values(this.credentials)) {
+    //     if (cList.length > 0) {
+    //       if (cList[0].user.avatar) {
+    //         return cList[0].user.avatar;
+    //       } else {
+    //         return "https://www.gravatar.com/avatar/" + cList[0].user.name;
+    //       }
+    //     }
+    //   }
+    //   return "https://www.gravatar.com/avatar/" + uuidv4();
+    // },
   },
   methods: {
     async openAccountLink(credentialType, credential) {

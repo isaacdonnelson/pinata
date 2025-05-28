@@ -738,3 +738,76 @@ module.exports.resetData = () => {
     }
   }
 };
+// TODO -early stages.
+module.exports.checkAuth = () => {
+  try {
+    const metadata = metaDb.JSON();
+    return metadata && metadata.apiToken ? true : false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+module.exports.login = (data) => {
+  try {
+    // Simulate login logic
+    const { email, password } = data;
+    if (email && password) {
+      const apiToken = "mockApiToken"; // Replace with actual API token generation logic
+      metaDb.set("apiToken", apiToken);
+      metaDb.set("email", email);
+      metaDb.sync();
+      return { status: STATUSES.SUCCESS, apiToken };
+    }
+    return { status: STATUSES.ERROR, message: "Invalid credentials" };
+  } catch (error) {
+    console.log(error);
+    return { status: STATUSES.ERROR, message: error.message };
+  }
+};
+
+module.exports.register = (data) => {
+  debugger; // For debugging purposes
+  console.log("Registering user with data:", data);
+  try {
+    // Simulate registration logic
+    const { email, username, fullname } = data;
+    if (email && username && fullname) {
+      // Store user data (mock implementation)
+      metaDb.set("email", email);
+      metaDb.set("username", username);
+      metaDb.set("fullname", fullname);
+      metaDb.sync();
+      return { status: STATUSES.SUCCESS, message: "Registration successful" };
+    }
+    return { status: STATUSES.ERROR, message: "Invalid registration data" };
+  } catch (error) {
+    console.log(error);
+    return { status: STATUSES.ERROR, message: error.message };
+  }
+};
+
+module.exports.logout = () => {
+  try {
+    metaDb.delete("apiToken");
+    metaDb.sync();
+    return { status: STATUSES.SUCCESS, message: "Logged out successfully" };
+  } catch (error) {
+    console.log(error);
+    return { status: STATUSES.ERROR, message: error.message };
+  }
+};
+
+module.exports.refreshToken = () => {
+  try {
+    // Simulate token refresh logic
+    const newApiToken = "mockNewApiToken"; // Replace with actual token refresh logic
+    metaDb.set("apiToken", newApiToken);
+    metaDb.sync();
+    return { status: STATUSES.SUCCESS, apiToken: newApiToken };
+  } catch (error) {
+    console.log(error);
+    return { status: STATUSES.ERROR, message: error.message };
+  }
+};

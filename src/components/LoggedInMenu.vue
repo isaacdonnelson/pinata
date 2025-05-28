@@ -54,12 +54,12 @@
           v-bind="attrs"
           v-on="on"
         >
-          <img
+          <!-- <img
             style="border-radius: 100%; border: solid 1px #eaecf0"
             :src="profileAvatar"
             width="40"
             alt="avatar"
-          />
+          /> -->
           <strong
             class="ml-3 fs-14"
             :style="{ color: currentTheme.secondary }"
@@ -91,7 +91,7 @@
                 width="32"
                 height="32"
               >
-                <img :src="profileAvatar" alt="avatar" width="32" />
+                <!-- <img :src="profileAvatar" alt="avatar" width="32" /> -->
               </v-list-item-avatar>
 
               <v-list-item-content>
@@ -129,6 +129,7 @@
       </v-card>
     </v-menu>
     <SettingsDialog
+      v-if="settingsDialog"
       v-model="settingsDialog"
       ref="settingsDialog"
       @close="settingsDialog = false"
@@ -136,7 +137,7 @@
   </div>
 </template>
 <script>
-import uuidv4 from "uuid";
+// import uuidv4 from "uuid";
 import { VBtn } from "vuetify/lib/components";
 import { mapGetters } from "vuex";
 import SettingsDialog from "@/components/dialogs/SettingsDialog.vue";
@@ -170,18 +171,18 @@ export default {
       }
       return this.$t("caption.personal_workspace");
     },
-    profileAvatar() {
-      for (const cList of Object.values(this.credentials)) {
-        if (cList.length > 0) {
-          if (cList[0].user.avatar) {
-            return cList[0].user.avatar;
-          } else if (cList[0].user.name) {
-            return "https://www.gravatar.com/avatar/" + cList[0].user.name;
-          }
-        }
-      }
-      return "https://www.gravatar.com/avatar/" + uuidv4() + "?d=robohash";
-    },
+    // profileAvatar() {
+    //   for (const cList of Object.values(this.credentials)) {
+    //     if (cList.length > 0) {
+    //       if (cList[0].user.avatar) {
+    //         return cList[0].user.avatar;
+    //       } else if (cList[0].user.name) {
+    //         return "https://www.gravatar.com/avatar/" + cList[0].user.name;
+    //       }
+    //     }
+    //   }
+    //   return "https://www.gravatar.com/avatar/" + uuidv4() + "?d=robohash";
+    // },
   },
   methods: {
     async openAccountLink(credentialType, credential) {

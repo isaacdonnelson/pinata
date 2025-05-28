@@ -430,5 +430,80 @@
     "restart_session": "Restart session?",
     "delete_session": "Delete session?",
     "restart_session_description": "All data related to the test sessions including photos, video, audio and other materials will be lost. Сontinue?"
+  },
+  "emailOrUsernameLabel": "Your email or username",
+  "passwordLabel": "Password",
+  "inputPlaceholder": "Enter your {field}",
+  "rememberMe": "Remember me",
+  "forgotPassword": "Forgot password?",
+  "signInHeader": "Welcome back",
+  "signUpTo": "Sign up here",
+  "signIn": "Sign in",
+  "doNotHaveAccount": "Don't have an account?",
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "emailOrUsername": "Email or username",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "loginButton": "Log in",
+      "loginWithGoogle": "Log in with Google",
+      "orContinueWithEmail": "Or continue with email",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "rememberMe": "Remember me"
+    },
+    "register": {
+      "title": "Sign up",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "signUpButton": "Sign up",
+      "haveAccount": "Already have an account?",
+      "login": "Log in",
+      "termsAndConditions": "I agree to the Terms and Conditions"
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "newPassword": "New password",
+      "confirmNewPassword": "Confirm new password",
+      "resetButton": "Reset password",
+      "backToLogin": "Back to login"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "email": "Email",
+      "sendButton": "Send reset link",
+      "backToLogin": "Back to login",
+      "checkEmail": "Check your email",
+      "emailSent": "We've sent a password reset link to your email"
+    },
+    "errors": {
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordMatch": "Passwords do not match",
+      "invalidCredentials": "Invalid email or password",
+      "emailExists": "This email is already registered",
+      "resetLinkExpired": "Password reset link has expired",
+      "resetLinkInvalid": "Invalid password reset link"
+    },
+    "success": {
+      "passwordReset": "Password reset successful!",
+      "registration": "Registration successful!",
+      "emailSent": "Email sent successfully!"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
   }
 }

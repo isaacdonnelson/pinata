@@ -78,6 +78,16 @@ export const IPC_FUNCTIONS = {
 
   START_SERVER: "startServer",
   STOP_SERVER: "stopServer",
+
+  CHECK_AUTH: "checkAuth",
+  LOGIN: "login",
+  REGISTER: "register",
+  LOGOUT: "logout",
+  VERIFY_EMAIL: "verifyEmail",
+  RESEND_VERIFICATION: "resendVerification",
+  SET_PASSWORD: "setPassword",
+  REFRESH_TOKEN: "refreshToken",
+  LOGIN_WITH_GOOGLE: "loginWithGoogle",
 };
 
 export const IPC_BIND_KEYS = {

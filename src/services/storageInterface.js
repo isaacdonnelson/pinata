@@ -1,5 +1,37 @@
 export default class StorageInterface {
   // eslint-disable-next-line
+  async login(credentials) {
+    throw new Error("Method 'login(credentials)' must be implemented.");
+  }
+
+  async logout() {
+    throw new Error("Method 'logout()' must be implemented.");
+  }
+
+  async checkAuth() {
+    throw new Error("Method 'checkAuth()' must be implemented.");
+  }
+
+  async loginWithGoogle() {
+    throw new Error("Method 'loginWithGoogle()' must be implemented.");
+  }
+
+  // eslint-disable-next-line
+  async register(userData) {
+    throw new Error("Method 'register(userData)' must be implemented.");
+  }
+
+  // eslint-disable-next-line
+  async verifyEmail(token) {
+    throw new Error("Method 'verifyEmail(token)' must be implemented.");
+  }
+
+  // eslint-disable-next-line
+  async resendVerification(email) {
+    throw new Error("Method 'resendVerification(email)' must be implemented.");
+  }
+
+  // eslint-disable-next-line
   async getState(executionId) {
     throw new Error("Method 'getState()' must be implemented.");
   }

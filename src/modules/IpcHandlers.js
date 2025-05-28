@@ -117,6 +117,27 @@ ipcMain.handle(IPC_HANDLERS.PERSISTENCE, async (event, args) => {
       return persistenceUtility.getNotes(args.data);
     case IPC_FUNCTIONS.RESET_DATA:
       return persistenceUtility.resetData(args.data);
+    case IPC_FUNCTIONS.CHECK_AUTH:
+      return persistenceUtility.checkAuth();
+    case IPC_FUNCTIONS.LOGIN:
+      return persistenceUtility.login(args.data);
+    case IPC_FUNCTIONS.REGISTER:
+      return persistenceUtility.register(args.data);
+    case IPC_FUNCTIONS.LOGOUT:
+      return persistenceUtility.logout();
+    case IPC_FUNCTIONS.VERIFY_EMAIL:
+      return persistenceUtility.verifyEmail(args.data.token);
+    case IPC_FUNCTIONS.RESEND_VERIFICATION:
+      return persistenceUtility.resendVerification(args.data.email);
+    case IPC_FUNCTIONS.SET_PASSWORD:
+      return persistenceUtility.setPassword(
+        args.data.token,
+        args.data.password
+      );
+    case IPC_FUNCTIONS.REFRESH_TOKEN:
+      return persistenceUtility.refreshToken();
+    case IPC_FUNCTIONS.LOGIN_WITH_GOOGLE:
+      return persistenceUtility.loginWithGoogle();
     default:
       return null;
   }
