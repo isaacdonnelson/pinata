@@ -17,8 +17,8 @@ export default class StorageInterface {
   }
 
   // eslint-disable-next-line
-  async register(userData) {
-    throw new Error("Method 'register(userData)' must be implemented.");
+  async registerUser(userData) {
+    throw new Error("Method 'registerUser(userData)' must be implemented.");
   }
 
   // eslint-disable-next-line
@@ -90,5 +90,13 @@ export default class StorageInterface {
   // eslint-disable-next-line
   async createNewSession(state) {
     throw new Error("Method 'createNewSession(state)' must be implemented.");
+  }
+  // eslint-disable-next-line
+  async validateInvite(data) {
+    throw new Error("Method 'validateInvite(data)' must be implemented.");
+  }
+  // eslint-disable-next-line
+  async validateGoogleSignUp(token) {
+    throw new Error("Method 'validateGoogleSignUp(data)' must be implemented.");
   }
 }

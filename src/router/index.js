@@ -212,28 +212,29 @@ router.beforeEach(async (to, from, next) => {
     return next();
   }
 
-  try {
-    // Handle Electron vs Web differently
-    if (process.env.IS_ELECTRON) {
-      // Desktop version - check auth status via IPC
-      const response = await store.dispatch("auth/checkAuth");
-      if (!response.isAuthenticated) {
-        store.commit("auth/setRedirectPath", to.fullPath);
-        return next("/login");
-      }
-    } else {
-      // Web version - check auth status via API
-      const response = await store.dispatch("auth/checkAuth");
-      if (!response.isAuthenticated) {
-        store.commit("auth/setRedirectPath", to.fullPath);
-        return next("/login");
-      }
-    }
-  } catch (error) {
-    console.error("Auth check failed:", error);
-    store.commit("auth/setRedirectPath", to.fullPath);
-    return next("/login");
-  }
+  // TODO - Uncomment and implement the auth check logic
+  // try {
+  // Handle Electron vs Web differently
+  // if (process.env.IS_ELECTRON) {
+  // Desktop version - check auth status via IPC
+  //     const response = await store.dispatch("auth/checkAuth");
+  //     if (!response.isAuthenticated) {
+  //       store.commit("auth/setRedirectPath", to.fullPath);
+  //       return next("/login");
+  //     }
+  //   } else {
+  //     // Web version - check auth status via API
+  //     const response = await store.dispatch("auth/checkAuth");
+  //     if (!response.isAuthenticated) {
+  //       store.commit("auth/setRedirectPath", to.fullPath);
+  //       return next("/login");
+  //     }
+  //   }
+  // } catch (error) {
+  //   console.error("Auth check failed:", error);
+  //   store.commit("auth/setRedirectPath", to.fullPath);
+  //   return next("/login");
+  // }
 
   // Then proceed with navigation
   next();

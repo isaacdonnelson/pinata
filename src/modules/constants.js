@@ -81,7 +81,7 @@ export const IPC_FUNCTIONS = {
 
   CHECK_AUTH: "checkAuth",
   LOGIN: "login",
-  REGISTER: "register",
+  REGISTER_USER: "registerUser",
   LOGOUT: "logout",
   VERIFY_EMAIL: "verifyEmail",
   RESEND_VERIFICATION: "resendVerification",

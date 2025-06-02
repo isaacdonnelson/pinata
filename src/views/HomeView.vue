@@ -338,7 +338,7 @@ export default {
       checklistPresessionTasks: "config/checklistPresessionTasks",
       checklistPostsessionTasks: "config/checklistPostsessionTasks",
       credentials: "auth/credentials",
-      isAuthenticated: "auth/isAuthenticated",
+      isAuthenticated: "user/isAuthenticated",
       loggedInServices: "auth/loggedInServices",
       config: "config/fullConfig",
     }),

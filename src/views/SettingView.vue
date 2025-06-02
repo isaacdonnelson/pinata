@@ -89,7 +89,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isAuthenticated: "auth/isAuthenticated",
+      isAuthenticated: "user/isAuthenticated",
     }),
     mainBg() {
       return this.$vuetify.theme.dark ? "#374151" : this.currentTheme.white;

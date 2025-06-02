@@ -121,12 +121,12 @@ ipcMain.handle(IPC_HANDLERS.PERSISTENCE, async (event, args) => {
       return persistenceUtility.checkAuth();
     case IPC_FUNCTIONS.LOGIN:
       return persistenceUtility.login(args.data);
-    case IPC_FUNCTIONS.REGISTER:
-      return persistenceUtility.register(args.data);
+    case IPC_FUNCTIONS.REGISTER_USER:
+      return persistenceUtility.registerUser(args.data);
     case IPC_FUNCTIONS.LOGOUT:
       return persistenceUtility.logout();
     case IPC_FUNCTIONS.VERIFY_EMAIL:
-      return persistenceUtility.verifyEmail(args.data.token);
+      return persistenceUtility.verifyEmail(args.data);
     case IPC_FUNCTIONS.RESEND_VERIFICATION:
       return persistenceUtility.resendVerification(args.data.email);
     case IPC_FUNCTIONS.SET_PASSWORD:

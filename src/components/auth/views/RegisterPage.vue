@@ -13,7 +13,6 @@
           <div class="text-center login-header mb-8">Sign up</div>
 
           <v-btn
-            v-if="!this.$isElectron"
             block
             :color="btnBg"
             class="mb-6 google-btn"
@@ -37,16 +36,32 @@
 
           <v-form ref="form" @submit.prevent="handleSignup">
             <div class="mb-2">
-              <label class="input-label">Full name</label>
+              <label class="input-label">First name</label>
               <v-text-field
-                v-model="signupInfo.fullName"
-                placeholder="Enter your full name"
+                v-model="signupInfo.firstName"
+                placeholder="Enter your first name"
                 outlined
                 dense
                 class="mb-4 auth-input"
-                :rules="fullNameValidation"
-                :error-messages="errors.fullName"
-                @input="clearError('fullName')"
+                :rules="firstNameValidation"
+                :error-messages="errors.firstName"
+                @input="clearError('firstName')"
+                background-color="#f9fafb"
+                hide-details="auto"
+              />
+            </div>
+
+            <div class="mb-2">
+              <label class="input-label">Last name</label>
+              <v-text-field
+                v-model="signupInfo.lastName"
+                placeholder="Enter your last name"
+                outlined
+                dense
+                class="mb-4 auth-input"
+                :rules="lastNameValidation"
+                :error-messages="errors.lastName"
+                @input="clearError('lastName')"
                 background-color="#f9fafb"
                 hide-details="auto"
               />
@@ -85,6 +100,67 @@
               />
             </div>
 
+            <div class="mb-2">
+              <label class="input-label">Password</label>
+              <v-text-field
+                v-model="signupInfo.password"
+                placeholder="Choose a password"
+                :type="visiblePassword ? 'text' : 'password'"
+                :append-icon="
+                  visiblePassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
+                "
+                @click:append="visiblePassword = !visiblePassword"
+                outlined
+                dense
+                class="mb-1 auth-input"
+                :rules="passwordValidation"
+                :error-messages="errors.password"
+                @input="clearError('password')"
+                background-color="#f9fafb"
+                hide-details="auto"
+              />
+              <!-- Password requirements -->
+              <div class="password-requirements mt-2 mb-4">
+                <div :class="['requirement', meetsLength ? 'met' : '']">
+                  At least 8 characters
+                </div>
+                <div
+                  :class="['requirement', meetsLettersAndNumbers ? 'met' : '']"
+                >
+                  Mix of letters and numbers
+                </div>
+                <div :class="['requirement', meetsSpecialChar ? 'met' : '']">
+                  At least 1 special character
+                </div>
+                <div :class="['requirement', meetsCasing ? 'met' : '']">
+                  At least 1 lowercase and 1 uppercase letter
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="input-label">Confirm password</label>
+              <v-text-field
+                v-model="signupInfo.confirmPassword"
+                placeholder="Confirm your password"
+                :type="visibleConfirmPassword ? 'text' : 'password'"
+                :append-icon="
+                  visibleConfirmPassword
+                    ? 'mdi-eye-off-outline'
+                    : 'mdi-eye-outline'
+                "
+                @click:append="visibleConfirmPassword = !visibleConfirmPassword"
+                outlined
+                dense
+                class="auth-input"
+                :rules="confirmPasswordValidation"
+                :error-messages="errors.confirmPassword"
+                @input="clearError('confirmPassword')"
+                background-color="#f9fafb"
+                hide-details="auto"
+              />
+            </div>
+
             <v-btn
               block
               color="primary"
@@ -93,7 +169,7 @@
               :loading="signupBtnLoading"
               class="mb-6 auth-btn login-btn"
             >
-              <span class="login-btn-text">Continue</span>
+              <span class="login-btn-text">Sign Up</span>
             </v-btn>
 
             <div class="text-center">
@@ -127,6 +203,7 @@ import HeaderView from "@/components/HeaderView.vue";
 import {
   emailValidationRules,
   usernameValidationRules,
+  passwordValidationRules,
 } from "@/utils/validation";
 import { mapActions } from "vuex";
 
@@ -139,29 +216,77 @@ export default {
   data() {
     return {
       signupInfo: {
-        fullName: "",
+        firstName: "",
+        lastName: "",
         email: "",
         username: "",
+        password: "",
+        confirmPassword: "",
       },
+      visiblePassword: false,
+      visibleConfirmPassword: false,
       signupBtnLoading: false,
       errors: {
-        fullName: null,
+        firstName: null,
+        lastName: null,
         email: null,
         username: null,
+        password: null,
+        confirmPassword: null,
       },
       snackbar: {
         show: false,
         message: "",
         color: "success",
       },
+      invite: null,
     };
   },
+  async mounted() {
+    // Check for invite parameters in the URL
+    this.checkForInvite(this.$route.params);
+    // If there's a signup token in the query, validate it
+    const token = this.$route.query.signupToken;
+    if (token) {
+      try {
+        const response = await this.$store.commit["user/validateGoogleSignUp"](
+          token
+        );
+        console.log("Google signup token validation response:", response);
+        if (response.status === 200 && response.data) {
+          const user = response.data;
+          console.log("User data from Google signup:", user);
+          await this.$store.dispatch("user/initSession", {
+            user: user,
+            currentAccount: {
+              handle: user.handle,
+              type: "user",
+              name: `${user.firstName} ${user.lastName}`,
+              roleName: "owner",
+            },
+          });
+          // TODO - step?
+          // step.value = 2;
+        }
+      } catch (error) {
+        console.error("Error validating Google signup token:", error);
+        // showAuthErrorToast(Swal, error.response?.data?.error || error.message);
+      }
+    }
+  },
   computed: {
-    fullNameValidation() {
+    firstNameValidation() {
       return [
-        (v) => !!v || "Full name is required",
+        (v) => !!v || "First name is required",
         (v) =>
-          (v && v.length >= 2) || "Full name must be at least 2 characters",
+          (v && v.length >= 2) || "First name must be at least 2 characters",
+      ];
+    },
+    lastNameValidation() {
+      return [
+        (v) => !!v || "Last name is required",
+        (v) =>
+          (v && v.length >= 2) || "Last name must be at least 2 characters",
       ];
     },
     emailValidation() {
@@ -170,65 +295,147 @@ export default {
     usernameValidation() {
       return usernameValidationRules();
     },
+    passwordValidation() {
+      return passwordValidationRules();
+    },
+    confirmPasswordValidation() {
+      return [
+        (v) => !!v || "Please confirm your password",
+        (v) => v === this.signupInfo.password || "Passwords do not match",
+      ];
+    },
+    meetsLength() {
+      return this.signupInfo.password.length >= 8;
+    },
+    meetsLettersAndNumbers() {
+      return /(?=.*[A-Za-z])(?=.*\d)/.test(this.signupInfo.password);
+    },
+    meetsSpecialChar() {
+      return /[!@#$%^&*(),.?":{}|<>]/.test(this.signupInfo.password);
+    },
+    meetsCasing() {
+      return /(?=.*[a-z])(?=.*[A-Z])/.test(this.signupInfo.password);
+    },
   },
   methods: {
-    ...mapActions("auth", ["setUser", "setIsAuthenticated"]),
+    ...mapActions("user", ["registerUser", "initSession"]),
     clearError(field) {
       this.errors[field] = null;
     },
     async handleSignup() {
-      if (this.$refs.form.validate()) {
-        this.signupBtnLoading = true;
-        try {
-          // Make direct service call
-          const response = await this.$storageService.register({
-            fullName: this.signupInfo.fullName,
-            email: this.signupInfo.email,
-            username: this.signupInfo.username,
-          });
+      // if (this.$refs.form.validate()) {
+      this.signupBtnLoading = true;
+      const userData = {
+        firstName: "FirstName",
+        lastName: "LastName",
+        email: "BobbyJoe@gmail.com",
+        handle: "happyUser12",
+        password: "CapitalOne#2234",
+        // firstName: this.signupInfo.firstName,
+        // lastName: this.signupInfo.lastName,
+        // email: this.signupInfo.email,
+        // handle: this.signupInfo.username,
+        // password: this.signupInfo.password,
+      };
+      try {
+        // TODO - email confirmation
+        // call endpoint to register user
+        await this.$store.commit("user/registerUser", userData);
+        // Initialize session with user data
+        await this.$store.dispatch("user/initSession", {
+          user: userData,
+          currentAccount: {
+            handle: this.signupInfo.username,
+            type: "user",
+            name: `${this.signupInfo.firstName} ${this.signupInfo.lastName}`,
+            roleName: "owner",
+          },
+        });
+        const response = await this.$store.getters["user/getUser"];
+        console.log("User registered successfully:", response);
 
-          // Update store state
-          await this.$store.commit("auth/setUser", response.user);
-          await this.$store.commit("auth/setIsAuthenticated", true);
-          // await this.$store.commit("auth/register", response);
+        // Show success message
+        this.snackbar = {
+          show: true,
+          message: "Registration successful!",
+          color: "success",
+        };
 
-          // Show success message
+        if (this.invite.value) {
+          this.$router.push({ name: "", params: this.invite.value });
+        } else {
+          // step.value = 2;
+        }
+        this.$router.push({
+          name: "Home",
+          query: userData,
+        });
+      } catch (error) {
+        // Handle validation errors
+        if (error.response?.data?.errors) {
+          const { errors } = error.response.data;
+          this.errors = {
+            firstName: errors.firstName,
+            lastName: errors.lastName,
+            email: errors.email,
+            username: errors.username,
+            password: errors.password,
+            confirmPassword: errors.confirmPassword,
+          };
+        } else {
+          // Show generic error
           this.snackbar = {
             show: true,
-            message:
-              "Registration successful! Please check your email to verify your account.",
-            color: "success",
+            message: error.response?.data?.message || "Registration failed",
+            color: "error",
           };
-
-          // Redirect to email confirmation
-          this.$router.push({
-            name: "EmailConfirmation",
-            query: { email: this.signupInfo.email },
-          });
-        } catch (error) {
-          // Handle validation errors
-          if (error.response?.data?.errors) {
-            const { errors } = error.response.data;
-            this.errors = {
-              fullName: errors.fullName,
-              email: errors.email,
-              username: errors.username,
-            };
-          } else {
-            // Show generic error
-            this.snackbar = {
-              show: true,
-              message: error.response?.data?.message || "Registration failed",
-              color: "error",
-            };
-          }
-        } finally {
-          this.signupBtnLoading = false;
         }
+      } finally {
+        this.signupBtnLoading = false;
       }
+      // }
     },
     signupWithGoogle() {
       // Implement Google signup logic
+      const url = `https://api.testfiesta.com/core/signin/google`;
+      window.location.href = url;
+    },
+    // TODO: add accept logic for invite etc.
+    // Check for invite token and organization in the URL parameters
+    checkForInvite(params) {
+      if (!params?.token || !params.org) return;
+
+      const inviteData = { handle: params.org, token: params.token };
+
+      this.$store
+        .dispatch("user/getInvite", inviteData)
+        .then((response) => {
+          if (response.data) {
+            this.invite = response.data;
+            this.$router.push({ name: "GetInvite", params: this.invite });
+          } else {
+            this.$router.push({ name: "RegisterPage" });
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching invite:", error);
+          this.$router.push({ name: "RegisterPage" });
+        });
+
+      // makeOrgService($api)
+      //   .validateInvite(inviteData)
+      //   .then((response) => {
+      //     invite.value = {
+      //       ...inviteData,
+      //       organization: response.data.name,
+      //       senderName: `${response.data.sender.firstName} ${response.data.sender.lastName}`,
+      //     };
+      //     user.value.email = response.data.email;
+      //   })
+      //   .catch((e) => {
+      //     console.error(e);
+      //     showAuthErrorToast(Swal, t("invalidInvite"));
+      //   });
     },
   },
 };
@@ -265,6 +472,7 @@ export default {
   max-width: 400px;
   background: #ffffff;
   border-radius: 12px;
+  margin-top: 2vh;
 }
 
 .login-header {
@@ -384,5 +592,35 @@ export default {
   line-height: 20px;
   letter-spacing: 0;
   color: #0052ff;
+}
+
+.password-requirements {
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  color: #6b7280;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  color: #ef4444; /* Red color for unmet requirements */
+}
+
+.requirement.met {
+  color: #22c55e; /* Green color for met requirements */
+}
+
+.requirement::before {
+  content: "•";
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.requirement.met::before {
+  content: "✓";
+  margin-right: 8px;
+  font-size: 14px;
 }
 </style>

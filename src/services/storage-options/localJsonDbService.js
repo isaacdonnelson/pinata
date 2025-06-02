@@ -1,7 +1,13 @@
 import StorageInterface from "../storageInterface";
 import { IPC_FUNCTIONS, IPC_HANDLERS } from "@/modules/constants";
+import RestApiService from "./restApiService";
 
 export default class LocalJsonDbService extends StorageInterface {
+  constructor() {
+    super();
+    this.restApi = new RestApiService();
+  }
+
   async getState() {
     return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
       func: IPC_FUNCTIONS.GET_STATE,
@@ -175,61 +181,42 @@ export default class LocalJsonDbService extends StorageInterface {
   }
 
   async login(credentials) {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.LOGIN,
-      data: credentials,
-    });
+    return this.restApi.login(credentials);
   }
 
   async logout() {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.LOGOUT,
-    });
+    return this.restApi.logout();
   }
 
-  async checkPERSISTENCE() {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.CHECK_PERSISTENCE,
-    });
+  async checkAuth() {
+    return this.restApi.checkAuth();
   }
 
   async loginWithGoogle() {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.LOGIN_WITH_GOOGLE,
-    });
+    return this.restApi.loginWithGoogle();
   }
 
-  async register(userData) {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.REGISTER,
-      data: userData,
-    });
+  async registerUser(userData) {
+    return this.restApi.registerUser(userData);
   }
 
-  async verifyEmail(token) {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.VERIFY_EMAIL,
-      data: { token },
-    });
+  async stagedSignup(data) {
+    return this.restApi.stagedSignup(data);
+  }
+
+  async verifyEmail(data) {
+    return this.restApi.verifyEmail(data);
   }
 
   async resendVerification(email) {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.RESEND_VERIFICATION,
-      data: { email },
-    });
+    return this.restApi.resendVerification(email);
   }
 
   async setPassword(token, password) {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.SET_PASSWORD,
-      data: { token, password },
-    });
+    return this.restApi.setPassword(token, password);
   }
 
   async refreshToken() {
-    return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
-      func: IPC_FUNCTIONS.REFRESH_TOKEN,
-    });
+    return this.restApi.refreshToken();
   }
 }

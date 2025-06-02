@@ -7,6 +7,7 @@ import {
   DEFAULT_CHARTER_MAP_NODES,
   DEFAULT_CHARTER_MAP_CONNECTIONS,
 } from "@/modules/constants";
+import { user } from "@/store/modules/user";
 import { auth } from "@/store/modules/auth";
 import { config } from "@/store/modules/config";
 
@@ -375,6 +376,7 @@ const store = new Vuex.Store({
     },
   },
   modules: {
+    user,
     auth,
     config,
   },

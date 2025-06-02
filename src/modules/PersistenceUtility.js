@@ -530,7 +530,6 @@ module.exports.addItem = (item) => {
 
 module.exports.updateItem = (newItem) => {
   try {
-    debugger;
     let session = dataDb.get("session");
     let items = session.items.map((item) => {
       if (item.stepID === newItem.stepID) {
@@ -767,8 +766,7 @@ module.exports.login = (data) => {
   }
 };
 
-module.exports.register = (data) => {
-  debugger; // For debugging purposes
+module.exports.registerUser = (data) => {
   console.log("Registering user with data:", data);
   try {
     // Simulate registration logic

@@ -607,15 +607,17 @@ export default class RestApiService extends StorageInterface {
     }
   }
 
-  async register(userData) {
-    console.log("Registering user with data:", userData);
-    debugger; // For debugging purposes
-    const url = `${this.baseURL}/auth/register`;
+  async registerUser(userData) {
+    const url = `http://localhost:5050/core/signup`;
+    const payload = {
+      handle: userData.handle,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      password: userData.password,
+    };
     try {
-      debugger;
-      const response = await axios.post(url, userData, {
-        withCredentials: true,
-      });
+      const response = await axios.post(url, payload);
       return response.data;
     } catch (error) {
       console.error("Registration error:", error.response?.data?.errors);
@@ -623,14 +625,11 @@ export default class RestApiService extends StorageInterface {
     }
   }
 
-  async verifyEmail(token) {
-    const url = `${this.baseURL}/auth/verify-email`;
+  async verifyEmail(data) {
+    console.log("Verifying email with data:", data);
+    const url = `${this.api.defaults.baseURL}/`;
     try {
-      const response = await axios.post(
-        url,
-        { token },
-        { withCredentials: true }
-      );
+      const response = await this.api.post(url, { email: data });
       return response.data;
     } catch (error) {
       console.error("Email verification error:", error.response?.data?.errors);
@@ -676,6 +675,29 @@ export default class RestApiService extends StorageInterface {
       return response.data;
     } catch (error) {
       console.error("Token refresh error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+  async validateInvite(data) {
+    const url = `${this.baseURL}/orgs/${data.handle}/invite/${data.token}`;
+    try {
+      const response = await axios.get(url, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      console.error("Invite validation error:", error.response?.data?.errors);
+      throw error;
+    }
+  }
+  async validateGoogleSignUp(token) {
+    const url = `/signup/google/validate?signupToken=${token}`;
+    try {
+      const response = await this.api.get(url);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Google Sign-Up validation error:",
+        error.response?.data?.errors
+      );
       throw error;
     }
   }

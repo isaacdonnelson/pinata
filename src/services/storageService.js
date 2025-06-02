@@ -25,12 +25,12 @@ export default class StorageService {
     return this.storage.loginWithGoogle();
   }
 
-  async register(userData) {
-    return this.storage.register(userData);
+  async registerUser(userData) {
+    return this.storage.registerUser(userData);
   }
 
-  async verifyEmail(token) {
-    return this.storage.verifyEmail(token);
+  async verifyEmail(email) {
+    return this.storage.verifyEmail(email);
   }
 
   async resendVerification(email) {

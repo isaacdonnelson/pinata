@@ -2,7 +2,7 @@
   <v-app :style="{ backgroundColor: currentTheme.background }">
     <v-main>
       <v-overlay :absolute="true" :value="overlay"> </v-overlay>
-      <router-view :isAuthenticated="$store.getters['auth/isAuthenticated']" />
+      <router-view :isAuthenticated="$store.getters['user/isAuthenticated']" />
       <v-snackbar v-model="snackBar.enabled" timeout="3000">
         {{ snackBar.message }}
         <template v-slot:action="{ attrs }">

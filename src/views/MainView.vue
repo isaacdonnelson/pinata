@@ -116,7 +116,7 @@ export default {
       checklistPresessionStatus: "config/checklistPresessionStatus",
       checklistPresessionTasks: "config/checklistPresessionTasks",
       checklistPostsessionTasks: "config/checklistPostsessionTasks",
-      isAuthenticated: "auth/isAuthenticated",
+      isAuthenticated: "user/isAuthenticated",
       credentials: "auth/credentials",
       quickTest: "sessionQuickTest",
     }),
