@@ -10,6 +10,7 @@ import LowProfileView from "../views/LowProfileView.vue";
 
 import SettingView from "../views/SettingView.vue";
 import ConnectionsTab from "@/components/settings/ConnectionsTab.vue";
+import MyAccountTab from "@/components/settings/MyAccountTab.vue";
 import GeneralTab from "@/components/settings/GeneralTab.vue";
 import SupportTab from "@/components/settings/SupportTab.vue";
 import TemplateTab from "@/components/settings/TemplateTab.vue";
@@ -127,6 +128,12 @@ const routes = [
     children: [
       {
         path: "/",
+        name: "myAccount",
+        component: MyAccountTab,
+        props: true,
+      },
+      {
+        path: "general",
         name: "general",
         component: GeneralTab,
         props: true,

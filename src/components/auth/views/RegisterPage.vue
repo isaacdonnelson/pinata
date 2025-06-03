@@ -10,36 +10,32 @@
             </router-link>
           </div>
 
-          <div class="text-center login-header mb-8">Sign up</div>
+          <div class="text-center login-header mb-8">
+            {{ $t("auth.register.title") }}
+          </div>
 
-          <v-btn
-            block
-            :color="btnBg"
-            class="mb-6 google-btn"
-            height="48"
-            @click="signupWithGoogle"
-          >
-            <img
-              src="@/assets/google-icon.svg"
-              class="mr-2"
-              height="18"
-              alt="Google"
-            />
-            <div class="btn-text fs-14">Sign up with Google</div>
-          </v-btn>
+          <ContinueWithGoogleButton :loading="signupBtnLoading" />
 
           <div class="divider mb-6">
             <span class="divider-line"></span>
-            <span class="divider-text">Or continue with email</span>
+            <span class="divider-text">{{
+              $t("auth.login.orContinueWithEmail")
+            }}</span>
             <span class="divider-line"></span>
           </div>
 
           <v-form ref="form" @submit.prevent="handleSignup">
             <div class="mb-2">
-              <label class="input-label">First name</label>
+              <label class="input-label">{{
+                $t("auth.register.firstName")
+              }}</label>
               <v-text-field
                 v-model="signupInfo.firstName"
-                placeholder="Enter your first name"
+                :placeholder="
+                  $t('inputPlaceholder', {
+                    field: $t('auth.register.firstName'),
+                  })
+                "
                 outlined
                 dense
                 class="mb-4 auth-input"
@@ -190,7 +186,7 @@
       {{ snackbar.message }}
       <template v-slot:action="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbar.show = false">
-          Close
+          {{ $t("common.close") }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -200,6 +196,7 @@
 <script>
 import theme from "@/mixins/theme";
 import HeaderView from "@/components/HeaderView.vue";
+import ContinueWithGoogleButton from "@/components/auth/components/ContinueWithGoogleButton.vue";
 import {
   emailValidationRules,
   usernameValidationRules,
@@ -211,6 +208,7 @@ export default {
   name: "RegisterPage",
   components: {
     HeaderView,
+    ContinueWithGoogleButton,
   },
   mixins: [theme],
   data() {
@@ -252,10 +250,8 @@ export default {
         const response = await this.$store.commit["user/validateGoogleSignUp"](
           token
         );
-        console.log("Google signup token validation response:", response);
         if (response.status === 200 && response.data) {
           const user = response.data;
-          console.log("User data from Google signup:", user);
           await this.$store.dispatch("user/initSession", {
             user: user,
             currentAccount: {
@@ -397,8 +393,6 @@ export default {
     },
     signupWithGoogle() {
       // Implement Google signup logic
-      const url = `https://api.testfiesta.com/core/signin/google`;
-      window.location.href = url;
     },
     // TODO: add accept logic for invite etc.
     // Check for invite token and organization in the URL parameters
@@ -472,7 +466,6 @@ export default {
   max-width: 400px;
   background: #ffffff;
   border-radius: 12px;
-  margin-top: 2vh;
 }
 
 .login-header {

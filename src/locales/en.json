@@ -1,5 +1,8 @@
 {
   "caption": {
+    "update_profile": "Update profile",
+    "click_to_upload": "Click to upload",
+    "my_account": "My Account",
     "no_values_found": "No values found",
     "share_session": "Share session",
     "ai_assist": "AI assist",
@@ -299,7 +302,26 @@
     "testrail_instance_url": "Instance URL",
     "screenshot_target": "Screenshot target",
     "recording_target": "Recording target",
-    "keep_for_whole_session": "Keep this target for the whole session"
+    "keep_for_whole_session": "Keep this target for the whole session",
+    "account": "Account",
+    "profile": "Profile",
+    "security": "Security",
+    "update": "Update",
+    "delete_photo": "Delete",
+    "update_photo": "Update",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "email": "Email",
+    "timezone": "Timezone",
+    "delete_account": "Delete account",
+    "crop_photo": "Crop Photo",
+    "crop": "Crop",
+    "apply": "Apply",
+    "last_updated": "Last updated {time} ago",
+    "change_password": "Change Password",
+    "two_factor_auth": "Two-Factor Authentication",
+    "two_factor_desc": "Keep your account secure with an authentication app",
+    "enable": "Enable"
   },
   "hotkeys": {
     "general": "General",
@@ -429,7 +451,8 @@
     "client_secret": "Client Secret",
     "restart_session": "Restart session?",
     "delete_session": "Delete session?",
-    "restart_session_description": "All data related to the test sessions including photos, video, audio and other materials will be lost. Сontinue?"
+    "restart_session_description": "All data related to the test sessions including photos, video, audio and other materials will be lost. Сontinue?",
+    "delete_account_warning": "Once you delete your account, there is no going back. Please be certain."
   },
   "emailOrUsernameLabel": "Your email or username",
   "passwordLabel": "Password",

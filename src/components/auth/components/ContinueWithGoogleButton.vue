@@ -8,7 +8,7 @@
     @click="handleGoogleLogin"
   >
     <img src="@/assets/google-icon.svg" class="mr-2" height="18" alt="Google" />
-    <div class="btn-text fs-14">Continue with Google</div>
+    <div class="btn-text fs-14">{{ $t("auth.login.continueWithGoogle") }}</div>
   </v-btn>
 </template>
 

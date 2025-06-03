@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import MyAccountTab from "@/components/settings/MyAccountTab.vue";
 import GeneralTab from "@/components/settings/GeneralTab.vue";
 import ConnectionsTab from "@/components/settings/ConnectionsTab.vue";
 import TemplateTab from "@/components/settings/TemplateTab.vue";
@@ -77,6 +78,7 @@ export default {
     LogoWrapper,
     VBtn,
     VContainer,
+    MyAccountTab,
     GeneralTab,
     ConnectionsTab,
     TemplateTab,
@@ -106,48 +108,54 @@ export default {
       tabs: [
         {
           id: 1,
-          name: this.$tc("caption.general", 1),
+          name: this.$tc("caption.my_account", 1),
           route: `/settings`,
-          component: GeneralTab,
+          component: MyAccountTab,
         },
         {
           id: 2,
+          name: this.$tc("caption.general", 1),
+          route: `/settings/general`,
+          component: GeneralTab,
+        },
+        {
+          id: 3,
           name: this.$tc("caption.connections", 1),
           route: `/settings/connections`,
           component: ConnectionsTab,
         },
         {
-          id: 3,
+          id: 4,
           name: this.$tc("caption.templates", 1),
           route: `/settings/template`,
           component: TemplateTab,
         },
         {
-          id: 4,
+          id: 5,
           name: this.$tc("caption.checklists", 1),
           route: `/settings/checklist`,
           component: ConfigCheckListTab,
         },
         {
-          id: 5,
+          id: 6,
           name: this.$tc("caption.reports", 1),
           route: `/settings/reports`,
           component: ReportsTab,
         },
         {
-          id: 6,
+          id: 7,
           name: this.$tc("caption.addons", 1),
           route: `/settings/addons`,
           component: AddonsTab,
         },
         {
-          id: 7,
+          id: 8,
           name: this.$tc("caption.hotkeys", 1),
           route: `/settings/hotkeys`,
           component: HotkeysTab,
         },
         {
-          id: 8,
+          id: 9,
           name: this.$tc("caption.tags_tab", 1),
           route: `/settings/tabs`,
           component: TagsTab,
