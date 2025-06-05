@@ -11,7 +11,8 @@
           </div>
 
           <div class="text-center login-header mb-8">Log in</div>
-          <v-btn
+          <!-- TODO: implement Google auth -->
+          <!-- <v-btn
             v-if="!isElectron"
             block
             :color="btnBg"
@@ -32,7 +33,7 @@
             <span class="divider-line"></span>
             <span class="divider-text">Or continue with email</span>
             <span class="divider-line"></span>
-          </div>
+          </div> -->
 
           <v-form ref="form" @submit.prevent="handleLogin">
             <div class="mb-2">
@@ -123,6 +124,8 @@
 import { mapActions, mapGetters } from "vuex";
 import theme from "@/mixins/theme";
 import HeaderView from "@/components/HeaderView.vue";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
+
 import {
   emailOrUsernameValidationRules,
   passwordValidationRules,
@@ -154,7 +157,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("auth", ["isAuthenticated"]),
+    ...mapGetters("user", ["isAuthenticated"]),
     isElectron() {
       return window && window.process && window.process.type === "renderer";
     },
@@ -166,45 +169,54 @@ export default {
     },
   },
   methods: {
-    ...mapActions("auth", ["login", "loginWithGoogle"]),
+    ...mapGetters("user", ["getOrgs", "getCurrentAccount"]),
+    ...mapActions("user", ["loginUser"]),
     clearError(field) {
       this.errors[field] = null;
     },
     async handleLogin() {
       if (this.$refs.form.validate()) {
         this.signinBtnLoading = true;
+
         try {
-          const response = await this.login(this.loginInfo);
+          const response = await this.$store.dispatch(
+            "user/loginUser",
+            this.loginInfo
+          );
 
-          if (response && response.isAuthenticated) {
-            this.snackbar = {
-              show: true,
-              message: "Login successful!",
-              color: "success",
-            };
+          // Check for saved account preference
+          const savedAccount = this.getCurrentAccount();
+          let finalAccount = response.defaultAccount;
 
-            const redirectPath =
-              this.$store.getters["auth/redirectPath"] || "/workspace";
-            this.$router.push(redirectPath);
+          if (savedAccount && response.orgs != undefined) {
+            const matchingOrg = response.orgs.find(
+              (org) => org.uid === savedAccount.uid
+            );
+            if (matchingOrg) {
+              finalAccount = matchingOrg;
+            }
           }
+
+          showSuccessToast(this.$swal, this.$t("loginSuccess"));
+
+          // Get the intended destination or default to home
+          const intendedRoute = this.$route.query.redirect || {
+            name: "Home",
+            params: { handle: finalAccount.handle },
+          };
+
+          // If the intended route is a string (path), convert it to a route object
+          const destination =
+            typeof intendedRoute === "string"
+              ? { path: intendedRoute }
+              : intendedRoute;
+
+          this.$router.replace(destination);
         } catch (error) {
-          console.error("Login failed:", error);
-
-          if (error.response?.data?.errors) {
-            const { errors } = error.response.data;
-            this.errors = {
-              email: errors.email,
-              password: errors.password,
-            };
-          } else {
-            this.snackbar = {
-              show: true,
-              message:
-                error.response?.data?.message ||
-                "Login failed. Please try again.",
-              color: "error",
-            };
-          }
+          showErrorToast(
+            this.$swal,
+            error.response?.data?.error ?? this.$t("problemProcessingRequest")
+          );
         } finally {
           this.signinBtnLoading = false;
         }

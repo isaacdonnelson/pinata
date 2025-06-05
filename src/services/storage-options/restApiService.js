@@ -2,6 +2,8 @@ import axios from "axios";
 // import dayjs from "dayjs";
 import StorageInterface from "../storageInterface";
 import store from "@/store";
+import router from "@/router";
+import { v4 as uuidv4 } from "uuid";
 // import TestfiestaIntegrationHelpers from "@/integrations/TestfiestaIntegrationHelpers";
 
 export default class RestApiService extends StorageInterface {
@@ -12,50 +14,49 @@ export default class RestApiService extends StorageInterface {
       withCredentials: true,
     });
 
-    // Add request interceptor for token
-    // this.api.interceptors.request.use((config) => {
-    //   const token = localStorage.getItem("auth_token");
-    //   if (token) {
-    //     config.headers.Authorization = `Bearer ${token}`;
-    //   }
-    //   return config;
-    // });
+    // Add request interceptor for trace ID
+    this.api.interceptors.request.use(
+      (config) => {
+        const traceId = uuidv4();
+        config.headers["X-Trace-ID"] = traceId;
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
 
-    // Add response interceptor for token refresh
-    // this.api.interceptors.response.use(
-    //   (response) => response,
-    //   async (error) => {
-    //     const originalRequest = error.config;
-    //     if (error.response?.status === 401 && !originalRequest._retry) {
-    //       originalRequest._retry = true;
-    //       try {
-    //         const refreshToken = localStorage.getItem("refresh_token");
-    //         if (!refreshToken) throw new Error("No refresh token");
+    // Add response interceptor for auth errors
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const status = error.response?.status;
+        if (status === 401 && router.currentRoute.name !== "Login") {
+          // Clear user data from store
+          store.commit("user/setUser", null);
+          store.commit("user/setOrgs", null);
 
-    //         const response = await this.api.post("/auth/refresh", {
-    //           refreshToken,
-    //         });
-    //         const { token } = response.data;
-    //         localStorage.setItem("auth_token", token);
-    //         originalRequest.headers.Authorization = `Bearer ${token}`;
-    //         return this.api(originalRequest);
-    //       } catch (refreshError) {
-    //         localStorage.removeItem("auth_token");
-    //         localStorage.removeItem("refresh_token");
-    //         throw refreshError;
-    //       }
-    //     }
-    //     throw error;
-    //   }
-    // );
+          // Clear user data from localStorage but preserve currentAccount
+          localStorage.setItem("user", JSON.stringify(null));
+          localStorage.setItem("orgs", JSON.stringify(null));
+
+          // Redirect to login
+          router.push({ name: "Login" });
+        }
+        if (status === 423) {
+          router.push({ name: "Maintenance" });
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   async getState(executionId) {
     const handle = "idonn01";
-    const url = `${this.baseURL}/${handle}/projects/project1/executions/${executionId}`;
+    const url = `/${handle}/projects/project1/executions/${executionId}`;
 
     try {
-      const { data } = await axios.get(url, { withCredentials: true });
+      const { data } = await this.api.get(url);
       return data;
     } catch (error) {
       if (error.response?.status === 401) {
@@ -69,7 +70,7 @@ export default class RestApiService extends StorageInterface {
     const handle = "idonn01";
     const projectKey = "PROJECTKEY";
     const executionId = state.session.sessionID;
-    const baseUrl = `${this.baseURL}/${handle}/projects/${projectKey}/executions`;
+    const url = `/${handle}/projects/${projectKey}/executions/${executionId}`;
 
     const data = {
       name: state.case.title,
@@ -108,11 +109,7 @@ export default class RestApiService extends StorageInterface {
     let returnResponse = { link: "" };
 
     try {
-      let response;
-
-      // Update an existing execution
-      const url = `${baseUrl}/${executionId}`;
-      response = await axios.patch(url, data, { withCredentials: true });
+      const response = await this.api.patch(url, data);
       returnResponse = response.data;
     } catch (error) {
       console.error("Error updating state:", error.response?.data?.errors);
@@ -125,7 +122,7 @@ export default class RestApiService extends StorageInterface {
   async createTestCase(state) {
     const handle = "idonn01";
     const projectKey = "PROJECTKEY";
-    const url = `${this.baseURL}/${handle}/projects/${projectKey}/cases`;
+    const url = `/${handle}/projects/${projectKey}/cases`;
 
     const testCasePayload = {
       name: state.case.title,
@@ -150,19 +147,16 @@ export default class RestApiService extends StorageInterface {
     };
 
     try {
-      const testCaseResponse = await axios.post(url, testCasePayload, {
-        withCredentials: true,
-      });
-
-      if (testCaseResponse.status !== 200) {
-        console.error("Failed to create test case:", testCaseResponse.data);
+      const response = await this.api.post(url, testCasePayload);
+      if (response.status !== 200) {
+        console.error("Failed to create test case:", response.data);
         return null;
       }
 
-      console.log("Test case created successfully:", testCaseResponse.data);
-      store.commit("setCaseIDFromBackend", testCaseResponse.data.uid);
+      console.log("Test case created successfully:", response.data);
+      store.commit("setCaseIDFromBackend", response.data.uid);
 
-      return testCaseResponse.data;
+      return response.data;
     } catch (error) {
       console.error(
         "Error creating test case:",
@@ -175,12 +169,12 @@ export default class RestApiService extends StorageInterface {
   async createExecutionWithCase(state) {
     const handle = "idonn01";
     const projectKey = "PROJECTKEY";
-    const baseUrl = `${this.baseURL}/${handle}/projects/${projectKey}/executions`;
+    const url = `/${handle}/projects/${projectKey}/executions`;
 
     const executionPayload = {
-      name: state.case.title, // Required
-      version: 1, // Example value, should be dynamically set
-      testCaseRef: state.case.caseID, // Required
+      name: state.case.title,
+      version: 1,
+      testCaseRef: state.case.caseID,
       projectUid: state.project?.uid,
       steps: [],
       templateFields: {
@@ -205,19 +199,15 @@ export default class RestApiService extends StorageInterface {
     let returnResponse = { link: "" };
 
     try {
-      const response = await axios.post(baseUrl, executionPayload, {
-        withCredentials: true,
-      });
+      const response = await this.api.post(url, executionPayload);
       returnResponse = response.data;
 
-      // Set sessionID from backend response if provided
       if (returnResponse?.uid) {
         store.commit("setSessionIDFromBackend", returnResponse.uid);
       } else {
         console.warn("No uid returned from backend for new session");
       }
 
-      // Handle steps with upload URLs
       if (returnResponse?.steps) {
         for (const step of returnResponse.steps) {
           if (step.uploadURL) {
@@ -231,12 +221,11 @@ export default class RestApiService extends StorageInterface {
                 type: match.fileType,
               });
               try {
-                await axios.put(step.uploadURL, file, {
+                await this.api.put(step.uploadURL, file, {
                   headers: {
                     "Content-Type": match.fileType,
                     "X-Upload-Content-Length": match.fileSize,
                   },
-                  withCredentials: true,
                 });
               } catch (uploadError) {
                 console.error("File upload error:", uploadError);
@@ -285,15 +274,13 @@ export default class RestApiService extends StorageInterface {
     const executionId = state.session.sessionID;
     const caseId = state.case.caseID;
 
-    const url = `${this.baseURL}/${handle}/projects/${projectKey}/executions/${executionId}`;
-    const caseUrl = `${this.baseURL}/${handle}/projects/${projectKey}/cases/${caseId}`;
+    const executionUrl = `/${handle}/projects/${projectKey}/executions/${executionId}`;
+    const caseUrl = `/${handle}/projects/${projectKey}/cases/${caseId}`;
 
     if (executionId && caseId) {
       try {
-        await axios.delete(url, { withCredentials: true });
-        await axios.delete(caseUrl, {
-          withCredentials: true,
-        });
+        await this.api.delete(executionUrl);
+        await this.api.delete(caseUrl);
       } catch (error) {
         console.error(
           "Error deleting execution:",
@@ -308,7 +295,7 @@ export default class RestApiService extends StorageInterface {
 
   async createConfig() {
     const handle = "idonn01";
-    const url = `${this.baseURL}/${handle}/pinata/configs`;
+    const url = `/${handle}/pinata/configs`;
 
     const payload = {
       localOnly: false,
@@ -397,7 +384,7 @@ export default class RestApiService extends StorageInterface {
           paste: ["alt", "v"],
           edit: ["alt", "e"],
           delete: ["del"],
-        }, // Dialogs on workspace use general.save and general.cancel
+        },
         evidence: {
           name: ["ctrl", "n"],
           followUp: ["ctrl", "f"],
@@ -417,30 +404,24 @@ export default class RestApiService extends StorageInterface {
     };
 
     try {
-      const response = await axios.post(url, payload, {
-        withCredentials: true,
-      });
-      const returnResponse = response.data;
-
-      // console.log("Piñata Config created successfully:", data);
-      return returnResponse;
+      const response = await this.api.post(url, payload);
+      return response.data;
     } catch (error) {
       console.error("Failed to create Piñata Config:", error);
       throw error;
     }
   }
   async getConfig(config) {
-    const handle = "idonn01"; // TODO: Ensure this is set in Vuex
+    const handle = "idonn01";
     const configId = config.uid;
     if (!handle) {
       throw new Error(
         "Organization handle is not defined. Ensure the user is logged in."
       );
     }
-    const endpoint = `${this.baseURL}/${handle}/pinata/configs/${configId}`;
+    const url = `/${handle}/pinata/configs/${configId}`;
     try {
-      const { data } = await axios.get(endpoint, { withCredentials: true });
-      console.log("Config data:", data);
+      const { data } = await this.api.get(url);
       if (!data) {
         throw new Error("No data returned from the API.");
       }
@@ -454,15 +435,12 @@ export default class RestApiService extends StorageInterface {
   }
 
   async updateConfig(config) {
-    const handle = "idonn01"; // TODO: Ensure this is set in Vuex
+    const handle = "idonn01";
     const configId = config.uid;
-    const url = `${this.baseURL}/${handle}/pinata/configs/${configId}`;
+    const url = `/${handle}/pinata/configs/${configId}`;
 
     try {
-      const { data } = await axios.patch(url, config, {
-        withCredentials: true,
-      });
-      console.log("Config updated successfully:", data);
+      const { data } = await this.api.patch(url, config);
       return data;
     } catch (error) {
       if (error.response?.status === 401) {
@@ -480,10 +458,10 @@ export default class RestApiService extends StorageInterface {
   // TODO: Needed? Never called.
   async getAttachment(type, attachmentId) {
     const handle = "idonn01";
-    const url = `${this.baseURL}/${handle}/${type}/attachments/${attachmentId}/object`;
+    const url = `/${handle}/${type}/attachments/${attachmentId}/object`;
 
     try {
-      const { data } = await axios.get(url, { withCredentials: true });
+      const { data } = await this.api.get(url);
       return data;
     } catch (error) {
       if (error.response?.status === 401) {
@@ -554,31 +532,28 @@ export default class RestApiService extends StorageInterface {
   // };
   // }
 
-  handleAuthResponse(response) {
-    const { token, refreshToken, user } = response.data;
-
-    if (token) {
-      localStorage.setItem("auth_token", token);
-      if (refreshToken) {
-        localStorage.setItem("refresh_token", refreshToken);
-      }
-    }
-
-    return {
-      isAuthenticated: true,
-      user,
-      authType: response.data.authType || "token",
-    };
-  }
-
-  async login(credentials) {
-    const url = `${this.baseURL}/auth/login`;
+  async loginUser(credentials) {
+    const url = `/signin`;
     try {
-      const response = await axios.post(url, credentials, {
-        withCredentials: true,
-      });
-      this.handleAuthResponse(response);
-      return response.data;
+      const response = await this.api.post(url, credentials);
+
+      const { user } = response.data;
+      const orgResponse = await this.getOrgs(user.uid);
+      const { orgs } = orgResponse.orgs;
+
+      const account = {
+        handle: user.handle,
+        type: "user",
+        name: `${user.firstName} ${user.lastName}`,
+        roleName: "owner",
+        avatarUrl: user.avatarUrl,
+      };
+
+      return {
+        ...response.data,
+        orgs,
+        defaultAccount: account,
+      };
     } catch (error) {
       console.error("Login error:", error.response?.data?.errors);
       throw error;
@@ -586,9 +561,9 @@ export default class RestApiService extends StorageInterface {
   }
 
   async logout() {
-    const url = `${this.baseURL}/auth/logout`;
+    const url = `/auth/logout`;
     try {
-      const response = await axios.post(url, {}, { withCredentials: true });
+      const response = await this.api.post(url);
       return response.data;
     } catch (error) {
       console.error("Logout error:", error.response?.data?.errors);
@@ -596,19 +571,8 @@ export default class RestApiService extends StorageInterface {
     }
   }
 
-  async checkAuth() {
-    const url = `${this.baseURL}/auth/check`;
-    try {
-      const response = await axios.get(url, { withCredentials: true });
-      return response.data;
-    } catch (error) {
-      console.error("Auth check error:", error.response?.data?.errors);
-      throw error;
-    }
-  }
-
   async registerUser(userData) {
-    const url = `http://localhost:5050/core/signup`;
+    const url = `/signup`;
     const payload = {
       handle: userData.handle,
       firstName: userData.firstName,
@@ -617,7 +581,7 @@ export default class RestApiService extends StorageInterface {
       password: userData.password,
     };
     try {
-      const response = await axios.post(url, payload);
+      const response = await this.api.post(url, payload);
       return response.data;
     } catch (error) {
       console.error("Registration error:", error.response?.data?.errors);
@@ -625,41 +589,22 @@ export default class RestApiService extends StorageInterface {
     }
   }
 
-  async verifyEmail(data) {
-    console.log("Verifying email with data:", data);
-    const url = `${this.api.defaults.baseURL}/`;
-    try {
-      const response = await this.api.post(url, { email: data });
-      return response.data;
-    } catch (error) {
-      console.error("Email verification error:", error.response?.data?.errors);
-      throw error;
-    }
-  }
-
-  async resendVerification(email) {
-    const url = `${this.baseURL}/auth/resend-verification`;
-    try {
-      const response = await axios.post(
-        url,
-        { email },
-        { withCredentials: true }
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Resend verification error:", error.response?.data?.errors);
-      throw error;
-    }
-  }
+  // todo: implement this method to verify email
+  // async verifyEmail(data) {
+  //   const url = `/`;
+  //   try {
+  //     const response = await this.api.post(url, { email: data });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Email verification error:", error.response?.data?.errors);
+  //     throw error;
+  //   }
+  // }
 
   async setPassword(token, password) {
-    const url = `${this.baseURL}/auth/set-password`;
+    const url = `/auth/set-password`;
     try {
-      const response = await axios.post(
-        url,
-        { token, password },
-        { withCredentials: true }
-      );
+      const response = await this.api.post(url, { token, password });
       return response.data;
     } catch (error) {
       console.error("Set password error:", error.response?.data?.errors);
@@ -667,21 +612,10 @@ export default class RestApiService extends StorageInterface {
     }
   }
 
-  async refreshToken() {
-    const url = `${this.baseURL}/auth/refresh-token`;
-    try {
-      const response = await axios.post(url, {}, { withCredentials: true });
-      this.handleAuthResponse(response);
-      return response.data;
-    } catch (error) {
-      console.error("Token refresh error:", error.response?.data?.errors);
-      throw error;
-    }
-  }
   async validateInvite(data) {
-    const url = `${this.baseURL}/orgs/${data.handle}/invite/${data.token}`;
+    const url = `/orgs/${data.handle}/invite/${data.token}`;
     try {
-      const response = await axios.get(url, { withCredentials: true });
+      const response = await this.api.get(url);
       return response.data;
     } catch (error) {
       console.error("Invite validation error:", error.response?.data?.errors);
@@ -698,6 +632,16 @@ export default class RestApiService extends StorageInterface {
         "Google Sign-Up validation error:",
         error.response?.data?.errors
       );
+      throw error;
+    }
+  }
+  async getOrgs(userId) {
+    const url = `/users/${userId}/orgs`;
+    try {
+      const response = await this.api.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Get organizations error:", error.response?.data?.errors);
       throw error;
     }
   }

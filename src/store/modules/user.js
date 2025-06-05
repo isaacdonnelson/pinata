@@ -9,6 +9,7 @@ export const user = {
     currentAccount: null,
     signupOrgDetails: null,
     invite: null,
+    redirectPath: null,
   }),
   mutations: {
     // TODO - needed for pinata?
@@ -34,6 +35,11 @@ export const user = {
     registerUser(state, user) {
       state.user = user;
       this._vm.$storageService.registerUser(user);
+    },
+    setLoginState(state, { user, orgs, currentAccount }) {
+      state.user = user;
+      state.orgs = orgs;
+      state.currentAccount = currentAccount;
     },
     setUser(state, user) {
       state.user = user;
@@ -70,6 +76,14 @@ export const user = {
     },
     setUserPreferences(state, preferences) {
       state.user.preferences = preferences;
+    },
+    setProfileImage(state, url) {
+      if (state.user) {
+        state.user.avatar_url = url;
+      }
+    },
+    setRedirectPath(state, path) {
+      state.redirectPath = path;
     },
   },
   actions: {
@@ -198,8 +212,45 @@ export const user = {
       dispatch("setCurrentAccount", currentAccount);
       dispatch("setOrgs", orgs || []);
     },
+    async uploadProfileImage({ commit }, file) {
+      try {
+        const response = await this._vm.$storageService.uploadProfileImage(
+          file
+        );
+        if (response.success) {
+          commit("setProfileImage", response.url);
+          return { success: true, url: response.url };
+        }
+        return { success: false };
+      } catch (error) {
+        console.error("Error uploading profile image:", error);
+        throw error;
+      }
+    },
+    async loginUser({ commit }, credentials) {
+      const response = await this._vm.$storageService.loginUser(credentials);
+      commit("setLoginState", {
+        user: response.user,
+        orgs: response.orgs,
+        currentAccount: response.defaultAccount,
+      });
+      return response;
+    },
+    getRedirectPath({ state }) {
+      return state.redirectPath;
+    },
+    clearRedirectPath({ commit }) {
+      commit("setRedirectPath", null);
+    },
   },
   getters: {
+    getOrgs(state) {
+      state.orgs = this._vm.$storageService.getOrgs() || state.orgs;
+      return state.orgs;
+    },
+    getCurrentAccount(state) {
+      return state.currentAccount;
+    },
     getInvite(state) {
       return state.invite;
     },
@@ -280,5 +331,6 @@ export const user = {
         ? state.user.orgAuthzPermissions
         : state.orgs[orgIndex].orgAuthzPermissions;
     },
+    redirectPath: (state) => state.redirectPath,
   },
 };

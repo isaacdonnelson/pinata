@@ -1,21 +1,5 @@
 <template>
   <div class="d-flex justify-space-between align-center">
-    <v-btn
-      v-if="!$isElectron"
-      fab
-      small
-      color="primary"
-      height="32"
-      width="32"
-      class="mr-3"
-      @click="openSettingsDialog"
-    >
-      <img
-        :src="require('../../public/icon/gear.svg')"
-        width="20"
-        height="20"
-      />
-    </v-btn>
     <div class="flex flex-row justify-center mr-5">
       <v-btn
         id="btn__setting"
@@ -25,7 +9,7 @@
         small
         depressed
         color="default"
-        @click="openSettingWindow"
+        to="/settings"
       >
         <img
           :src="require('../../public/icon/gear.svg')"
@@ -54,12 +38,12 @@
           v-bind="attrs"
           v-on="on"
         >
-          <!-- <img
+          <img
             style="border-radius: 100%; border: solid 1px #eaecf0"
             :src="profileAvatar"
             width="40"
             alt="avatar"
-          /> -->
+          />
           <strong
             class="ml-3 fs-14"
             :style="{ color: currentTheme.secondary }"
@@ -129,7 +113,6 @@
       </v-card>
     </v-menu>
     <SettingsDialog
-      v-if="settingsDialog"
       v-model="settingsDialog"
       ref="settingsDialog"
       @close="settingsDialog = false"

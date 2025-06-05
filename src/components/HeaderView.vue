@@ -92,23 +92,6 @@
               <LoggedInMenu />
             </div>
             <div v-else>
-              <v-btn
-                id="btn__setting"
-                class="mx-1"
-                fab
-                icon
-                small
-                depressed
-                color="default"
-                to="/settings"
-                v-if="!isDisabled"
-              >
-                <img
-                  :src="require('../../public/icon/gear.svg')"
-                  width="20"
-                  height="20"
-                />
-              </v-btn>
               <v-menu
                 :nudge-width="100"
                 bottom
@@ -118,28 +101,6 @@
                 class="rounded-lg"
                 content-class="shadow-theme"
               >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    fab
-                    small
-                    color="primary"
-                    height="40"
-                    width="40"
-                    depressed
-                    offset-y
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon dark> mdi-account </v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item link to="/login">
-                    <v-list-item-title class="fs-16 font-weight-medium">{{
-                      $tc("caption.login", 1)
-                    }}</v-list-item-title>
-                  </v-list-item>
-                </v-list>
               </v-menu>
             </div>
           </div>
@@ -200,7 +161,7 @@ export default {
   computed: {
     ...mapGetters({
       quickTest: "sessionQuickTest",
-      isAuthenticated: "user/isAuthenticated",
+      isAuthenticated: "auth/isAuthenticated",
     }),
     elapsedTime() {
       const timer = this.$store.state.session.timer || 0;

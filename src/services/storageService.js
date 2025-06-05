@@ -9,8 +9,8 @@ export default class StorageService {
   }
 
   // Authentication methods
-  async login(credentials) {
-    return this.storage.login(credentials);
+  async loginUser(credentials) {
+    return this.storage.loginUser(credentials);
   }
 
   async logout() {

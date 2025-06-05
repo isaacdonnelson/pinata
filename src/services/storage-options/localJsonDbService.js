@@ -180,8 +180,8 @@ export default class LocalJsonDbService extends StorageInterface {
     });
   }
 
-  async login(credentials) {
-    return this.restApi.login(credentials);
+  async loginUser(credentials) {
+    return this.restApi.loginUser(credentials);
   }
 
   async logout() {

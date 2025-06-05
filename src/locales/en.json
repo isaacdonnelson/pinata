@@ -487,7 +487,19 @@
       "signUpButton": "Sign up",
       "haveAccount": "Already have an account?",
       "login": "Log in",
-      "termsAndConditions": "I agree to the Terms and Conditions"
+      "termsAndConditions": "I agree to the Terms and Conditions",
+      "username": "Username",
+      "org": "Organization",
+      "completeYourRegistration": "Complete your registration",
+      "inviteSetupAccount": "{name} has set up an account for you. To complete the process, just specify a password and your name",
+      "acceptInvite": "{name} invited you to join the party! To RSVP, add your first and last name below to join their organization.",
+      "reEnterPassword": "Re-enter password",
+      "areYouSureDecline": "Are you sure you want to decline an invitation?",
+      "sureDeclineInvitation": "Are you sure you want to decline an invitation from {name}?",
+      "whyDeclineInvitation": "Why are you declining this invitation?",
+      "completeRegistration": "Complete registration",
+      "alreadyHaveAccount": "Already have an account?",
+      "logintoyouraccount": "Log in here"
     },
     "resetPassword": {
       "title": "Reset password",

@@ -1,19 +1,19 @@
 <template>
-  <v-dialog v-model="dialog" max-width="500">
+  <v-dialog v-model="showModal" max-width="500">
     <v-card id="upload-avatar-modal">
-      <v-card-title>{{ $t("caption.crop_photo") }}</v-card-title>
+      <v-card-title>{{ $t("changeAvatar") }}</v-card-title>
       <v-card-text>
         <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
           <v-form
             role="changeAvatarForm"
-            @submit.prevent="handleSubmit(saveCrop)"
+            @submit.prevent="handleSubmit(updateAvatar)"
           >
             <div>
               <v-img
-                v-if="imageUrl && !image.src"
+                v-if="currentAvatar && !image.src"
                 height="300"
                 contain
-                :src="imageUrl"
+                :src="currentAvatar"
               />
               <cropper
                 v-else-if="image.src"
@@ -23,12 +23,16 @@
                 :src="image.src"
               />
               <div v-else style="height: 300px; width: 100%">
-                <h4>{{ $t("caption.select_image") }}</h4>
+                <h4>Select image</h4>
               </div>
             </div>
             <div class="d-flex justify-center mt-4">
-              <v-btn class="mr-8" :disabled="loading" @click="closeDialog">
-                {{ $t("caption.cancel") }}
+              <v-btn
+                class="mr-8"
+                :disabled="loading"
+                @click="hiddenModalUpload"
+              >
+                {{ $t("cancel") }}
               </v-btn>
               <v-btn
                 class="mr-8"
@@ -41,10 +45,10 @@
                   ref="file"
                   type="file"
                   hidden
-                  accept="image/jpeg,image/png,image/gif,image/svg+xml"
+                  :accept="`${profileImageTypes.join(', ')}`"
                   @change="uploadImage($event)"
                 />
-                {{ $t("caption.choose_image") }}
+                {{ $t("chooseImage") }}
               </v-btn>
               <v-btn
                 :disabled="loading || !image.src"
@@ -57,88 +61,167 @@
                   size="24"
                   color="white"
                 />
-                {{ $t("caption.save") }}
+                {{ $t("save") }}
               </v-btn>
             </div>
           </v-form>
         </ValidationObserver>
       </v-card-text>
     </v-card>
+    <!-- <template #activator="{ on }"> -->
+    <!-- <v-btn
+        id="upload-avatar-change-avatar-btn"
+        outlined
+        color="secondary"
+        icon
+        small
+        v-on="on"
+      > -->
+    <!-- <CameraIcon /> -->
+    <!-- </v-btn> -->
+    <!-- </template> -->
   </v-dialog>
 </template>
 
 <script>
 import { Cropper } from "vue-advanced-cropper";
+import { mapActions } from "vuex";
 import "vue-advanced-cropper/dist/style.css";
-import { ValidationObserver } from "vee-validate";
+import { createNamespacedHelpers } from "vuex";
+const { mapState, mapMutations } = createNamespacedHelpers("user");
+import { showErrorToast, showSuccessToast } from "@/utils/toast";
+import fileValidator from "@/mixins/fileValidator.js";
+import { profileImageTypes } from "@/constants/fileTypes.js";
+// import makeOrgService from "@/services/api/org";
+// import makeUserService from "@/services/api/user";
+// import makeProjectService from "@/services/api/project";
 
 export default {
-  name: "ProfilePhotoCropDialog",
   components: {
     Cropper,
-    ValidationObserver,
   },
+  mixins: [fileValidator],
   props: {
-    value: {
+    isOrg: {
       type: Boolean,
       default: false,
     },
-    imageUrl: {
+    profileImage: {
       type: String,
-      required: true,
+    },
+    mediaType: {
+      type: String,
+    },
+    emitFile: {
+      type: Boolean,
+    },
+    currentAvatar: {
+      type: String,
+      default: null,
     },
   },
   data() {
     return {
-      dialog: this.value,
+      profileImageTypes,
+      showModal: false,
       loading: false,
-      imageFile: null,
+      imageFile: null, // To store the selected image file
       image: {
         src: null,
         type: null,
       },
     };
   },
-  watch: {
-    value(val) {
-      this.dialog = val;
-      if (val) {
-        this.prepareImage();
-      }
-    },
-    dialog(val) {
-      this.$emit("input", val);
-    },
+  computed: {
+    ...mapState({ currentUser: "user" }),
   },
   methods: {
-    prepareImage() {
-      if (this.imageUrl) {
-        this.image.src = this.imageUrl;
-        const type = this.imageUrl.split(";")[0].split(":")[1];
-        this.image.type = type;
+    ...mapMutations(["updateUser"]),
+    ...mapActions({
+      uploadToServer: "attachment/uploadToServer",
+      setUser: "user/setUser",
+    }),
+    async updateAvatar() {
+      if (
+        !["project", "org", "user"].includes(this.profileImage) ||
+        !this.mediaType ||
+        !this.imageFile
+      )
+        return showErrorToast(
+          this.$swal,
+          this.$t("error.failedToUploadAvatar")
+        );
+
+      this.loading = true;
+      try {
+        // Get the result from the cropper
+        const result = this.$refs.cropper.getResult();
+        const dataUrl = result.canvas.toDataURL(this.imageFile.type);
+
+        let response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const fileUpload = new File([blob], this.imageFile.name, {
+          type: this.imageFile.type,
+        });
+
+        if (this.emitFile) return this.$emit("croppedFile", fileUpload);
+
+        const handle = this.$store.getters["user/currentAccount"].handle;
+        const mediaType = this.mediaType;
+        const apiService = {
+          // project: () => makeProjectService(this.$api),
+          // org: () => makeOrgService(this.$api),
+          // user: () => makeUserService(this.$api),
+        };
+
+        const params = {
+          handle,
+          ...(this.$route.params.key
+            ? { projectKey: this.$route.params.key }
+            : undefined),
+        };
+        const objectUrl = await this.uploadToServer({
+          mediaType,
+          file: fileUpload,
+          apiService: apiService[this.profileImage](),
+          params,
+        });
+        if (this.profileImage == "org") this.$emit("uploaded", objectUrl);
+        else if (this.profileImage == "user")
+          this.updateUser({
+            avatar: {
+              ...this.currentUser.avatar,
+              user: objectUrl,
+            },
+          });
+
+        // Show success notification
+        showSuccessToast(this.$swal, this.$t("profileUpdated"));
+      } catch (error) {
+        // Handle error
+        this.showErrorToast(
+          this.$swal,
+          this.$t("error.failedToUploadAvatar"),
+          {},
+          error?.response?.data
+        );
+      } finally {
+        this.loading = false;
+        this.hiddenModalUpload();
       }
     },
     uploadImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+      const files = Array.from(event.target.files);
 
-      const validTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/svg+xml",
-      ];
-      if (!validTypes.includes(file.type)) {
-        this.$emit("error", "Only JPG, PNG, GIF, or SVG allowed.");
-        return;
-      }
-      if (file.size > 800 * 1024) {
-        this.$emit("error", "File size must be less than 800K");
-        return;
-      }
+      const validationResult = this.validateMimeTypes(files, profileImageTypes);
 
-      this.imageFile = file;
-      this.prepareImageForUpload();
+      if (!validationResult.valid) {
+        showErrorToast(this.$swal, this.$t("error.fileFormatNotSupported"));
+      } else {
+        this.imageFile = files[0];
+
+        this.prepareImageForUpload();
+      }
     },
     prepareImageForUpload() {
       const reader = new FileReader();
@@ -147,45 +230,39 @@ export default {
       };
       reader.readAsDataURL(this.imageFile);
     },
-    closeDialog() {
-      this.dialog = false;
+    toDataUrl(url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        var reader = new FileReader();
+        reader.onloadend = function () {
+          callback(reader.result);
+        };
+        reader.readAsDataURL(xhr.response);
+      };
+      xhr.open("GET", url);
+      xhr.responseType = "blob";
+      xhr.send();
+    },
+    showModalUpload() {
+      const self = this;
+      this.toDataUrl(this.currentUser.avatar_url, function (myBase64) {
+        const type = myBase64.split(";")[0].split(":")[1];
+        self.image.type = type;
+      });
+      this.image.src = this.currentUser.avatar_url;
+      this.showModal = true;
+    },
+    hiddenModalUpload() {
+      this.showModal = false;
       this.loading = false;
       this.image = { src: null, type: null };
+
       if (this.$refs.observer) {
         this.$refs.observer.reset();
       }
     },
-    async saveCrop() {
-      if (!this.$refs.cropper) return;
-
-      this.loading = true;
-      try {
-        const result = this.$refs.cropper.getResult();
-        const dataUrl = result.canvas.toDataURL(
-          this.imageFile?.type || "image/png"
-        );
-
-        // Convert data URL to File object
-        let response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const fileUpload = new File(
-          [blob],
-          this.imageFile?.name || "cropped.png",
-          {
-            type: this.imageFile?.type || "image/png",
-          }
-        );
-
-        this.$emit("crop-saved", fileUpload);
-        this.closeDialog();
-      } catch (error) {
-        this.$emit("error", "Failed to crop image");
-      } finally {
-        this.loading = false;
-      }
-    },
   },
-  beforeDestroy() {
+  destroyed() {
     if (this.image.src) {
       URL.revokeObjectURL(this.image.src);
     }

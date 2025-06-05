@@ -19,7 +19,11 @@
                 @dragover.prevent
                 @drop.prevent="handleFileDrop"
               >
-                <upload-cloud-icon class="upload-icon" />
+                <img
+                  :src="uploadCloudIcon"
+                  alt="Upload Icon"
+                  class="upload-icon"
+                />
                 <div class="upload-label mt-2">
                   <div class="upload-desc mt-1">
                     <span class="upload-link">
@@ -117,7 +121,7 @@
               <v-btn
                 color="primary"
                 class="update-profile-btn"
-                @click="setUser(user)"
+                @click="onChangeProfile()"
               >
                 {{ $t("caption.update_profile") }}
               </v-btn>
@@ -130,7 +134,7 @@
               <p class="delete-warning">
                 {{ $t("message.delete_account_warning") }}
               </p>
-              <v-btn class="delete-btn" @click="confirmDeleteAccount">
+              <v-btn class="delete-btn" @click="onDeleteAccount">
                 {{ $t("caption.delete_account") }}
               </v-btn>
             </div>
@@ -175,9 +179,11 @@
     </v-tabs-items>
 
     <ProfilePhotoCropDialog
-      v-model="showCropDialog"
-      :image-url="tempImageUrl"
-      @crop-saved="handleCroppedImage"
+      ref="cropDialog"
+      :current-avatar="profilePhoto"
+      :profile-image="'user'"
+      :media-type="'avatar'"
+      @cropped-file="handleCroppedImage"
     />
 
     <v-snackbar v-model="snackbar" :timeout="4000" color="error">
@@ -190,16 +196,18 @@
 import { mapGetters, mapActions } from "vuex";
 import { timeZones } from "@/constants/timezones";
 import ProfilePhotoCropDialog from "./ProfilePhotoCropDialog.vue";
-import UploadCloudIcon from "@/assets/icon/upload-cloud-01.svg";
+import { profileImageTypes, maxFileSize } from "@/constants/fileTypes";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
+import uploadCloudIcon from "@/assets/icon/upload-cloud-02.svg";
 
 export default {
   name: "MyAccountTab",
   components: {
     ProfilePhotoCropDialog,
-    UploadCloudIcon,
   },
   data() {
     return {
+      uploadCloudIcon,
       requiredRules: [(value) => !!value || this.$t("error.requiredField")],
       activeTab: 0,
       user: {
@@ -209,7 +217,9 @@ export default {
         timeZone: "",
       },
       timeZones: timeZones,
-      //   showDeleteConfirmDialog: false, // TODO
+      showDeleteConfirmDialog: false,
+      profilePhoto: null,
+      tempImageUrl: null,
     };
   },
   computed: {
@@ -226,109 +236,164 @@ export default {
       //   return emailValidationRules(this); // TODO
     },
   },
-  watch: {
-    config: {
-      handler(newConfig) {
-        if (newConfig) {
-          this.firstName = newConfig.firstName || "";
-          this.lastName = newConfig.lastName || "";
-          this.email = newConfig.email || "";
-          this.timezone = newConfig.timezone || "";
-          this.profilePhoto = newConfig.profilePhoto || null;
-        }
-      },
-      immediate: true,
-    },
+
+  mounted() {
+    this.user.firstName = this.currentUser.firstName;
+    this.user.lastName = this.currentUser.lastName;
+    this.user.email = this.currentUser.email;
+    this.user.timeZone =
+      this.currentUser.preferences?.timeZone || "America/New_York";
   },
   methods: {
     ...mapActions({
       setUser: "user/setUser",
       setLoading: "setLoading",
+      uploadProfileImage: "user/uploadProfileImage",
     }),
+    async onChangeProfile() {
+      const isValidForm = this.$refs.form.validate();
+
+      if (!isValidForm) {
+        return;
+      }
+
+      this.setLoading({
+        loading: true,
+        loadingText: this.$t("account.updatingProfile"),
+      });
+
+      try {
+        const response = await this.$store.commit("user/updateProfile", {
+          firstName: this.user.firstName,
+          lastName: this.user.lastName,
+          preferences: {
+            ...this.currentUser.preferences,
+            timeZone: this.user.timeZone,
+          },
+        });
+
+        this.setUser({
+          ...this.currentUser,
+          ...response.data.user,
+        });
+
+        showSuccessToast(this.$swal, this.$t("profileUpdated"));
+      } catch (err) {
+        showErrorToast(
+          this.$swal,
+          err.response?.data?.message || "Internal server error"
+        );
+      } finally {
+        this.setLoading({
+          loading: false,
+        });
+      }
+    },
+    onDeleteAccount() {
+      //   this.showDeleteConfirmDialog = true
+    },
+    async deleteAccount(password) {
+      this.showDeleteConfirmDialog = false;
+
+      this.setLoading({
+        loading: true,
+        loadingText: this.$t("account.deletingAccount"),
+      });
+
+      try {
+        await this.$store.dispatch(
+          "user/deleteUser",
+          this.currentUser.uid,
+          password
+        );
+
+        showSuccessToast(this.$swal, this.$t("account.accountHasBeenDeleted"));
+
+        setTimeout(() => {
+          localStorage.clear();
+          window.location.href = "/login";
+        }, 100);
+      } catch (err) {
+        showErrorToast(
+          this.$swal,
+          err.response?.data?.message || "Internal server error"
+        );
+      } finally {
+        this.setLoading({
+          loading: false,
+        });
+      }
+    },
     triggerFileInput() {
       this.$refs.fileInput.click();
     },
     handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      const validTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/svg+xml",
-      ];
-      if (!validTypes.includes(file.type)) {
+
+      if (!profileImageTypes.includes(file.type)) {
         this.showSnackbar("Only JPG, PNG, GIF, or SVG allowed.");
         return;
       }
-      if (file.size > 800 * 1024) {
+
+      if (file.size > maxFileSize) {
         this.showSnackbar("File size must be less than 800K");
         return;
       }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         this.tempImageUrl = e.target.result;
-        this.showCropDialog = true;
+        this.$refs.cropDialog.showModalUpload();
+      };
+      reader.readAsDataURL(file);
+    },
+    handleFileDrop(event) {
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+
+      if (!profileImageTypes.includes(file.type)) {
+        this.showSnackbar("Only JPG, PNG, GIF, or SVG allowed.");
+        return;
+      }
+
+      if (file.size > maxFileSize) {
+        this.showSnackbar("File size must be less than 800K");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.tempImageUrl = e.target.result;
+        this.$refs.cropDialog.showModalUpload();
       };
       reader.readAsDataURL(file);
     },
     async handleCroppedImage(file) {
       try {
-        this.loading = true;
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("type", "profile");
-
-        const response = await this.$axios.post("/upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+        this.setLoading({
+          loading: true,
+          loadingText: this.$t("account.uploadingProfile"),
         });
 
-        if (response.data.success) {
-          // Convert File to URL string for v-img
-          const imageUrl = URL.createObjectURL(file);
-          this.profilePhoto = imageUrl;
-          this.$store.commit("setProfileImage", imageUrl);
-          this.$emit("profile-updated");
-          this.showSnackbar(this.$t("messages.profile_updated"));
+        const response = await this.uploadProfileImage(file);
+
+        if (response.success) {
+          this.profilePhoto = URL.createObjectURL(file);
+          showSuccessToast(this.$swal, this.$t("messages.profile_updated"));
         }
       } catch (error) {
         console.error("Error uploading profile image:", error);
-        this.showSnackbar(this.$t("messages.upload_failed"));
+        showErrorToast(this.$swal, this.$t("messages.upload_failed"));
       } finally {
-        this.loading = false;
+        this.setLoading({
+          loading: false,
+        });
       }
-    },
-    confirmDeleteAccount() {
-      // TODO: Implement account deletion confirmation logic
-    },
-    handleFileDrop(event) {
-      const file = event.dataTransfer.files[0];
-      if (!file) return;
-      const validTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/svg+xml",
-      ];
-      if (!validTypes.includes(file.type)) {
-        this.showSnackbar("Only JPG, PNG, GIF, or SVG allowed.");
-        return;
-      }
-      if (file.size > 800 * 1024) {
-        this.showSnackbar("File size must be less than 800K");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.tempImageUrl = e.target.result;
-        this.showCropDialog = true;
-      };
-      reader.readAsDataURL(file);
     },
     deletePhoto() {
       this.profilePhoto = null;
+      // TODO: Add API call to remove profile photo
     },
     showSnackbar(message) {
       this.snackbarMessage = message;
@@ -336,6 +401,12 @@ export default {
     },
     getSelectedClass(item) {
       return item.value === this.user.timeZone ? "selected-item" : "";
+    },
+    changePassword() {
+      //   TODO: Implement change password logic
+    },
+    enableTwoFactorAuth() {
+      //   TODO: Implement enable 2FA logic
     },
   },
 };
@@ -345,7 +416,7 @@ export default {
   padding: 25px;
 }
 .settings-header {
-  margin: 15px 0px;
+  margin-bottom: 15px;
   font-family: Inter, sans-serif;
   font-weight: 600;
   font-size: 35px;
@@ -368,8 +439,8 @@ export default {
   box-shadow: none !important;
   border: none !important;
   margin: 0 !important;
-  min-height: 44px !important;
-  width: 20vw !important;
+  height: 44px !important;
+  width: 28vw !important;
   padding: 10px 14px !important;
   display: flex !important;
   align-items: center !important;
@@ -466,14 +537,13 @@ export default {
   min-width: 100px;
 }
 .photo-upload-card {
-  width: 20vw;
-  height: 120px;
+  width: 28vw;
+  height: 138px;
   border-radius: 12px;
   border: 1.5px solid #e5e7eb;
   cursor: pointer;
   transition: border-color 0.2s;
   text-align: center;
-  padding: 24px 40px 10px 40px;
 }
 .photo-upload-card:hover {
   border-color: #0a26c3;
@@ -528,21 +598,6 @@ export default {
 .selected-item {
   font-weight: bold !important;
 }
-.upload-icon {
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  padding: 4px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.upload-icon :deep(svg) {
-  width: 24px;
-  height: 24px;
-  stroke: #000000;
-}
 .v-tabs {
   border-bottom: 1px solid #e5e7eb;
 }
@@ -552,5 +607,18 @@ export default {
 .v-tabs-slider {
   background-color: #0a26c3 !important;
   height: 2px !important;
+}
+.upload-icon {
+  width: 40px;
+  height: 40px;
+  fill: #354055; /* Change the color */
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 10px;
+  /* width: 40px;
+  height: 40px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

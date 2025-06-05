@@ -212,41 +212,41 @@ const router = new VueRouter({
   routes,
 });
 
-// Single beforeEach guard that handles auth
+// Auth guard
 router.beforeEach(async (to, from, next) => {
   // Skip auth check for public routes
   if (to.meta.public) {
     return next();
   }
 
-  // TODO - Uncomment and implement the auth check logic
-  // try {
-  // Handle Electron vs Web differently
-  // if (process.env.IS_ELECTRON) {
-  // Desktop version - check auth status via IPC
-  //     const response = await store.dispatch("auth/checkAuth");
-  //     if (!response.isAuthenticated) {
-  //       store.commit("auth/setRedirectPath", to.fullPath);
-  //       return next("/login");
-  //     }
-  //   } else {
-  //     // Web version - check auth status via API
-  //     const response = await store.dispatch("auth/checkAuth");
-  //     if (!response.isAuthenticated) {
-  //       store.commit("auth/setRedirectPath", to.fullPath);
-  //       return next("/login");
-  //     }
-  //   }
-  // } catch (error) {
-  //   console.error("Auth check failed:", error);
-  //   store.commit("auth/setRedirectPath", to.fullPath);
-  //   return next("/login");
-  // }
+  try {
+    // Handle Electron vs Web differently
+    if (process.env.IS_ELECTRON) {
+      // Desktop version - check auth status via IPC
+      const response = await store.dispatch("user/checkAuth");
+      if (!response.isAuthenticated) {
+        store.commit("auth/setRedirectPath", to.fullPath);
+        return next("/login");
+      }
+    } else {
+      // Web version - check auth status via API
+      const response = await store.dispatch("user/checkAuth");
+      if (!response.isAuthenticated) {
+        store.commit("auth/setRedirectPath", to.fullPath);
+        return next("/login");
+      }
+    }
+  } catch (error) {
+    console.error("Auth check failed:", error);
+    store.commit("auth/setRedirectPath", to.fullPath);
+    return next("/login");
+  }
 
   // Then proceed with navigation
   next();
 });
 
+// Session path tracking
 router.beforeEach((to, from, next) => {
   // This prevents us from saving store on initial load where name is null
   if (
