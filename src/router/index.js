@@ -220,30 +220,21 @@ router.beforeEach(async (to, from, next) => {
   }
 
   try {
-    // Handle Electron vs Web differently
-    if (process.env.IS_ELECTRON) {
-      // Desktop version - check auth status via IPC
-      const response = await store.dispatch("user/checkAuth");
-      if (!response.isAuthenticated) {
-        store.commit("auth/setRedirectPath", to.fullPath);
-        return next("/login");
-      }
-    } else {
-      // Web version - check auth status via API
-      const response = await store.dispatch("user/checkAuth");
-      if (!response.isAuthenticated) {
-        store.commit("auth/setRedirectPath", to.fullPath);
-        return next("/login");
-      }
+    // Check if user is authenticated via user store
+    const isAuthenticated = store.getters["user/isAuthenticated"];
+    if (!isAuthenticated) {
+      // Store the intended destination
+      store.commit("user/setRedirectPath", to.fullPath);
+      return next("/login");
     }
+
+    // If authenticated, proceed with navigation
+    next();
   } catch (error) {
     console.error("Auth check failed:", error);
-    store.commit("auth/setRedirectPath", to.fullPath);
+    store.commit("user/setRedirectPath", to.fullPath);
     return next("/login");
   }
-
-  // Then proceed with navigation
-  next();
 });
 
 // Session path tracking

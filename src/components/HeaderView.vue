@@ -161,7 +161,7 @@ export default {
   computed: {
     ...mapGetters({
       quickTest: "sessionQuickTest",
-      isAuthenticated: "auth/isAuthenticated",
+      isAuthenticated: "user/isAuthenticated",
     }),
     elapsedTime() {
       const timer = this.$store.state.session.timer || 0;
