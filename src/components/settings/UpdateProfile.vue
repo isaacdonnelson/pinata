@@ -157,11 +157,16 @@ export default {
   },
 
   mounted() {
-    this.user.firstName = this.currentUser.firstName;
-    this.user.lastName = this.currentUser.lastName;
-    this.user.email = this.currentUser.email;
-    this.user.timeZone =
-      this.currentUser.preferences?.timeZone || "America/New_York";
+    this.updateUserData();
+  },
+
+  watch: {
+    currentUser: {
+      handler() {
+        this.updateUserData();
+      },
+      deep: true,
+    },
   },
 
   methods: {
@@ -181,10 +186,8 @@ export default {
         loadingText: this.$t("account.updatingProfile"),
       });
 
-      const userService = makeUserService(this.$api);
-
       try {
-        const response = await userService.updateProfile({
+        const response = await this.$store.dispatch("user/updateUserProfile", {
           firstName: this.user.firstName,
           lastName: this.user.lastName,
           preferences: {
@@ -244,6 +247,15 @@ export default {
           loading: false,
         });
       }
+    },
+
+    updateUserData() {
+      this.user = {
+        firstName: this.currentUser.firstName,
+        lastName: this.currentUser.lastName,
+        email: this.currentUser.email,
+        timeZone: this.currentUser.preferences?.timeZone || "America/New_York",
+      };
     },
   },
 };

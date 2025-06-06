@@ -16,7 +16,7 @@
         }"
       >
         <div class="d-flex align-center justify-start">
-          <component to="/" :is="isDisabled ? 'span' : 'router-link'">
+          <component :is="isDisabled ? 'span' : 'router-link'" :to="logoRoute">
             <img :src="pinataLogo" alt="logo" draggable="false" />
           </component>
           <div class="tabs" style="display: none">
@@ -163,6 +163,9 @@ export default {
       quickTest: "sessionQuickTest",
       isAuthenticated: "user/isAuthenticated",
     }),
+    logoRoute() {
+      return this.isAuthenticated ? { name: "Home" } : "/";
+    },
     elapsedTime() {
       const timer = this.$store.state.session.timer || 0;
       const date = new Date(null);

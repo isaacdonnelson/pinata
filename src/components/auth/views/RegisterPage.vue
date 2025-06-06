@@ -342,21 +342,12 @@ export default {
         password: this.user.password,
       };
       try {
-        // TODO - email confirmation
-        // call endpoint to register user
-        await this.$store.commit("user/registerUser", userData);
-        // Initialize session with user data
-        await this.$store.dispatch("user/initSession", {
-          user: userData,
-          currentAccount: {
-            handle: this.user.handle,
-            type: "user",
-            name: `${this.user.firstName} ${this.user.lastName}`,
-            roleName: "owner",
-          },
-        });
-        const response = await this.$store.getters["user/getUser"];
-        console.log("User registered successfully:", response);
+        // Register user
+        await this.$store.dispatch("user/registerUser", userData);
+
+        // Create config for the new user
+        const config = await this.$storageService.createConfig();
+        this.$store.commit("config/setFullConfig", config);
 
         // Show success message
         this.snackbar = {
@@ -365,11 +356,7 @@ export default {
           color: "success",
         };
 
-        if (this.invite.value) {
-          this.$router.push({ name: "", params: this.invite.value });
-        } else {
-          // step.value = 2;
-        }
+        // Navigate to home
         this.$router.push({
           name: "Home",
           query: userData,
@@ -397,7 +384,6 @@ export default {
       } finally {
         this.signupBtnLoading = false;
       }
-      // }
     },
     signupWithGoogle() {
       // Implement Google signup logic

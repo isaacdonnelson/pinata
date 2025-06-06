@@ -1,5 +1,4 @@
-// import { registerUserUtil } from "@/modules/PersistenceUtility";x
-// import { stat } from "original-fs";
+import { showErrorToast } from "@/utils/toast";
 
 export const user = {
   namespaced: true,
@@ -85,99 +84,42 @@ export const user = {
     setRedirectPath(state, path) {
       state.redirectPath = path;
     },
+    clearUser(state) {
+      state.user = null;
+      state.orgs = [];
+      state.currentAccount = null;
+      state.redirectPath = null;
+    },
   },
   actions: {
-    // todo - refactor to use the pinata storage service
-    // eslint-disable-next-line no-unused-vars
-    initSettings({ state, dispatch }) {
-      // const currentAccount = settingsService.getCurrentAccount();
-      // // Verify current account access
-      // if (currentAccount && state.orgs) {
-      //   const hasAccess = state.orgs.some(
-      //     (org) => org.uid === currentAccount.uid
-      //   );
-      //   if (!hasAccess) {
-      //     // User no longer has access to current account, reset to first available org
-      //     if (state.orgs.length > 0) {
-      //       const defaultAccount = {
-      //         isOrg: true,
-      //         ...state.orgs[0],
-      //       };
-      //       settingsService.setCurrentAccount(defaultAccount);
-      //       state.currentAccount = defaultAccount;
-      //     } else {
-      //       settingsService.setCurrentAccount(null);
-      //       state.currentAccount = null;
-      //     }
-      //   } else {
-      //     state.currentAccount = currentAccount;
-      //   }
-      // }
-      // // Set default account if none exists
-      // if (!state.currentAccount && state.orgs && state.orgs.length > 0) {
-      //   const defaultAccount = {
-      //     isOrg: true,
-      //     ...state.orgs[0],
-      //   };
-      //   settingsService.setCurrentAccount(defaultAccount);
-      //   state.currentAccount = defaultAccount;
-      // }
-      // if (state.currentAccount) {
-      //   dispatch("project/get", state.currentAccount.uid, { root: true });
-      // }
+    async getHandlePreferences({ commit }, { handle, accountType }) {
+      try {
+        const response = await this._vm.$storageService.getHandlePreferences(
+          handle
+        );
+        const preferencesData = response.data.preferences || response.data;
+
+        const timestamp = new Date().getTime();
+        commit("setUserPreferences", {
+          preferences: { ...preferencesData, timestamp },
+          type: accountType,
+          handle,
+        });
+      } catch (err) {
+        console.error("Error fetching handle preferences:", err);
+        showErrorToast(
+          "fetchError",
+          { item: "preferences" },
+          err?.response?.data
+        );
+      }
     },
-    async updateProjectAuthz() {
-      // async updateProjectAuthz({ commit }, { handle, projectKey }) {
-      // const projectsService = makeProjectsService(api);
-      // const response = await projectsService.getAuthz(handle, projectKey);
-      // commit("setProjectAuthz", {
-      // permissions: response.data[handle].projects[projectKey],
-      // handle,
-      // projectKey,
-      // });
-    },
-    // eslint-disable-next-line no-unused-vars
-    async setOrgAuthz({ commit, state }, { permissions, handle }) {
-      // async setOrgAuthz({ commit, dispatch, state }, { permissions, handle }) {
-      // commit("_setOrgAuthz", { permissions, handle });
-      // if (state.orgs.find((org) => org.handle === handle)) return;
-      // const userService = makeUserService(api);
-      // try {
-      // const response = await userService.getOrgs(handle);
-      // await dispatch("setOrgs", response.data?.orgs || []);
-      // commit("_setOrgAuthz", { permissions, handle });
-      // if (state.orgs.find((org) => org.handle === handle)) return;
-      // commit("error404/SET_SHOW_404", true, { root: true });
-      // } catch (error) {
-      // console.error("Failed to set org permissions:", error);
-      // throw error;
-      // }
-    },
-    async updateOrgAuthz() {
-      // async updateOrgAuthz({ dispatch }, handle) {
-      // const orgService = makeOrgService(api);
-      // const response = await orgService.getAuthz(handle);
-      // await dispatch("setOrgAuthz", {
-      //   permissions: response.data[handle].permissions,
-      //   handle,
-      // });
-    },
-    /**
-     * set currently selected account
-     * @param {Object} currentAccount
-     */
     setCurrentAccount({ commit }, currentAccount) {
-      // settingsService.setCurrentAccount(currentAccount);
       commit("setCurrentAccount", currentAccount);
     },
     setOrgs({ commit }, newOrgs) {
-      // credentialService.setOrgs(newOrgs);
       commit("setOrgs", newOrgs);
     },
-    /**
-     * set user on org and cache
-     * @param {Object} newUser
-     */
     setUser({ commit }, newUser) {
       const { preferences, ...data } = newUser;
       const fieldsToIgnore = ["secret", "phoneNumber", "recoveryCodes"];
@@ -189,11 +131,6 @@ export const user = {
           }
         });
       }
-
-      // credentialService.setUser({
-      // ...data,
-      // preferences: preferences || {},
-      // });
       commit("setUser", {
         ...data,
         preferences: preferences || {},
@@ -202,11 +139,6 @@ export const user = {
     setUserPreferences({ commit }, preferences) {
       commit("setUserPreferences", preferences);
     },
-    /**
-     * persists a user session for subsequent auth
-     * @param {*} param0
-     * @param {*} accounts
-     */
     initSession({ dispatch }, { user, currentAccount, orgs }) {
       dispatch("setUser", user);
       dispatch("setCurrentAccount", currentAccount);
@@ -236,6 +168,16 @@ export const user = {
       });
       return response;
     },
+    async registerUser({ commit }, userData) {
+      const response = await this._vm.$storageService.registerUser(userData);
+      commit("setUser", response.user);
+      commit("setOrgs", response.orgs || []);
+      commit("setCurrentAccount", response.defaultAccount);
+      return response;
+    },
+    logout({ commit }) {
+      commit("clearUser");
+    },
     getRedirectPath({ state }) {
       return state.redirectPath;
     },
@@ -260,7 +202,7 @@ export const user = {
         : "";
     },
     isAuthenticated(state) {
-      return state?.user;
+      return !!state.user;
     },
     currentAccount(state) {
       return state?.currentAccount;
@@ -275,7 +217,7 @@ export const user = {
       return state.orgs;
     },
     getUserPreferences(state) {
-      return state?.user.preferences || {};
+      return state?.user?.preferences || {};
     },
     getSignupOrgDetails(state) {
       return state.signupOrgDetails;
@@ -296,20 +238,10 @@ export const user = {
         ) || []
       );
     },
-    /**
-     * returns true if the current user is org admin
-     * @param {String} handle
-     * @return {Boolean} isAdmin
-     */
     isOrgAdmin: (state) => (handle) => {
       let org = state.orgs.filter((org) => org.handle == handle)[0];
       return org && org.roleName !== "member";
     },
-    /**
-     * get org with org handle
-     * @param {String} handle
-     * @return {Object} org
-     */
     getOrg: (state) => (handle) => {
       return state.orgs.filter((org) => org.handle == handle)[0];
     },

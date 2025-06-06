@@ -41,7 +41,7 @@ export default {
     },
   }),
   mounted() {
-    this.$root.$on("update-auth", this.updateAuth);
+    // this.$root.$on("update-auth", this.updateAuth);
     this.$root.$on("set-snackbar", this.setSnackBar);
     this.$root.$on("overlay", (value) => {
       this.overlay = value;

@@ -138,6 +138,10 @@ ipcMain.handle(IPC_HANDLERS.PERSISTENCE, async (event, args) => {
       return persistenceUtility.refreshToken();
     case IPC_FUNCTIONS.LOGIN_WITH_GOOGLE:
       return persistenceUtility.loginWithGoogle();
+    case IPC_FUNCTIONS.GET_HANDLE_PREFERENCES:
+      return persistenceUtility.getHandlePreferences(args.data);
+    case IPC_FUNCTIONS.UPDATE_USER_PROFILE:
+      return persistenceUtility.updateUserProfile(args.data);
     default:
       return null;
   }

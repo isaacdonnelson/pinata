@@ -220,12 +220,14 @@ export default {
       showDeleteConfirmDialog: false,
       profilePhoto: null,
       tempImageUrl: null,
+      snackbar: false,
+      snackbarMessage: "",
     };
   },
   computed: {
     ...mapGetters({
       config: "config/fullConfig",
-      currentUser: "user/user", // TODO
+      currentUser: "user/user",
     }),
 
     emailRules() {
@@ -238,11 +240,16 @@ export default {
   },
 
   mounted() {
-    this.user.firstName = this.currentUser.firstName;
-    this.user.lastName = this.currentUser.lastName;
-    this.user.email = this.currentUser.email;
-    this.user.timeZone =
-      this.currentUser.preferences?.timeZone || "America/New_York";
+    // Load user data
+    if (this.currentUser) {
+      this.user.firstName = this.currentUser.firstName || "";
+      this.user.lastName = this.currentUser.lastName || "";
+      this.user.email = this.currentUser.email || "";
+      this.user.timeZone =
+        this.currentUser.preferences?.timeZone || "America/New_York";
+      this.profilePhoto =
+        this.currentUser.avatar?.user || this.currentUser.avatarUrl || null;
+    }
   },
   methods: {
     ...mapActions({
@@ -251,19 +258,13 @@ export default {
       uploadProfileImage: "user/uploadProfileImage",
     }),
     async onChangeProfile() {
-      const isValidForm = this.$refs.form.validate();
-
-      if (!isValidForm) {
-        return;
-      }
-
-      this.setLoading({
-        loading: true,
-        loadingText: this.$t("account.updatingProfile"),
-      });
-
       try {
-        const response = await this.$store.commit("user/updateProfile", {
+        this.setLoading({
+          loading: true,
+          loadingText: this.$t("account.updatingProfile"),
+        });
+
+        const response = await this.$store.dispatch("user/updateProfile", {
           firstName: this.user.firstName,
           lastName: this.user.lastName,
           preferences: {

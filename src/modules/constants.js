@@ -88,6 +88,8 @@ export const IPC_FUNCTIONS = {
   SET_PASSWORD: "setPassword",
   REFRESH_TOKEN: "refreshToken",
   LOGIN_WITH_GOOGLE: "loginWithGoogle",
+  GET_HANDLE_PREFERENCES: "getHandlePreferences",
+  UPDATE_USER_PROFILE: "updateUserProfile",
 };
 
 export const IPC_BIND_KEYS = {

@@ -17,6 +17,13 @@ export default class StorageService {
     return this.storage.logout();
   }
 
+  async getHandlePreferences(handle) {
+    return this.storage.getHandlePreferences(handle);
+  }
+  async updateUserProfile(userData) {
+    return this.storage.updateUserProfile(userData);
+  }
+
   async checkAuth() {
     return this.storage.checkAuth();
   }

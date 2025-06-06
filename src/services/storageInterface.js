@@ -91,10 +91,21 @@ export default class StorageInterface {
   async uploadProfileImage(file) {
     throw new Error("Method 'uploadProfileImage(file)' must be implemented.");
   }
+
   async loginUser(user) {
     throw new Error("Method 'loginUser(user)' must be implemented.");
   }
+
   async getOrgs(userId) {
     throw new Error("Method 'getOrgs(userId)' must be implemented.");
+  }
+
+  async getHandlePreferences(handle) {
+    throw new Error(
+      "Method 'getHandlePreferences(handle)' must be implemented."
+    );
+  }
+  async updateUserProfile(profile) {
+    throw new Error("Method 'updateUserProfile(profile)' must be implemented.");
   }
 }

@@ -219,4 +219,12 @@ export default class LocalJsonDbService extends StorageInterface {
   async refreshToken() {
     return this.restApi.refreshToken();
   }
+
+  async getHandlePreferences(handle) {
+    return this.restApi.getHandlePreferences(handle);
+  }
+
+  async updateUserProfile(userData) {
+    return this.restApi.updateUserProfile(userData);
+  }
 }

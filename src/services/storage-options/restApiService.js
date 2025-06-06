@@ -645,4 +645,27 @@ export default class RestApiService extends StorageInterface {
       throw error;
     }
   }
+  async getHandlePreferences(handle) {
+    const url = `/${handle}/preferences`;
+    try {
+      const response = await this.api.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching handle preferences:", error.response?.data);
+      throw error;
+    }
+  }
+  async updateUserProfile(profileData) {
+    const url = `/profile`;
+    try {
+      const response = await this.api.patch(url, profileData);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error updating user profile:",
+        error.response?.data?.errors
+      );
+      throw error;
+    }
+  }
 }
