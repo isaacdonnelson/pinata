@@ -10,9 +10,15 @@
             </router-link>
           </div>
 
-          <div class="text-center login-header mb-8">Forgot password</div>
+          <div v-if="!showConfirmation" class="text-center login-header mb-8">
+            Forgot password
+          </div>
 
-          <v-form ref="form" @submit.prevent="handleForgotPassword">
+          <v-form
+            v-if="!showConfirmation"
+            ref="form"
+            @submit.prevent="handleForgotPassword"
+          >
             <div class="mb-2">
               <label class="input-label">Email</label>
               <v-text-field
@@ -51,6 +57,24 @@
               </router-link>
             </div>
           </v-form>
+
+          <div v-else class="confirmation-message">
+            <div class="text-center login-header mb-8">Confirm Your Email</div>
+            <div class="text-center mb-6">
+              <p class="confirmation-text">
+                Done! We've sent a confirmation email to
+                <strong>{{ email }}</strong
+                >. Please check and click the link inside to complete the
+                process. Thanks!
+              </p>
+              <a
+                href="#"
+                @click.prevent="handleForgotPassword"
+                class="resend-link"
+                >Resend it</a
+              >
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -89,6 +113,7 @@ export default {
         message: "",
         color: "success",
       },
+      showConfirmation: false,
     };
   },
   computed: {
@@ -105,15 +130,16 @@ export default {
       this.errors[field] = null;
     },
     async handleForgotPassword() {
-      if (this.$refs.form.validate()) {
+      if (!this.showConfirmation && this.$refs.form.validate()) {
         this.loading = true;
         try {
           await this.$storageService.forgotPassword(this.email);
           this.snackbar = {
             show: true,
-            message: "Password reset email sent. Please check your inbox.",
+            message: `Done! We've sent a confirmation email to ${this.email}. Please check and click the link inside to complete the process. Thanks!`,
             color: "success",
           };
+          this.showConfirmation = true;
         } catch (error) {
           console.error("Password reset failed:", error);
           if (error.response?.data?.errors) {
@@ -256,5 +282,25 @@ export default {
   line-height: 20px;
   letter-spacing: 0;
   color: #0052ff;
+}
+
+.confirmation-text {
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.resend-link {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0052ff;
+  text-decoration: none;
+}
+
+.resend-link:hover {
+  text-decoration: underline;
 }
 </style>
