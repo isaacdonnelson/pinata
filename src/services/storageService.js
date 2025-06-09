@@ -155,4 +155,12 @@ export default class StorageService {
   async getAttachment(attachmentId) {
     return this.storage.getAttachment(attachmentId);
   }
+
+  async cleanupAttachments(handle, id, relatedTo) {
+    return this.storage.cleanupAttachments(handle, id, relatedTo);
+  }
+
+  async getSignedAttachmentUrl(handle, payload) {
+    return this.storage.getSignedAttachmentUrl(handle, payload);
+  }
 }

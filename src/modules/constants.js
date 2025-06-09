@@ -90,6 +90,9 @@ export const IPC_FUNCTIONS = {
   LOGIN_WITH_GOOGLE: "loginWithGoogle",
   GET_HANDLE_PREFERENCES: "getHandlePreferences",
   UPDATE_USER_PROFILE: "updateUserProfile",
+
+  CLEANUP_ATTACHMENTS: "cleanupAttachments",
+  GET_SIGNED_ATTACHMENT_URL: "getSignedAttachmentUrl",
 };
 
 export const IPC_BIND_KEYS = {

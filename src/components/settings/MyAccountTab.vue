@@ -72,7 +72,7 @@
             <div class="mb-2">
               <label class="input-label">{{ $t("caption.first_name") }}</label>
               <v-text-field
-                v-model="firstName"
+                v-model="user.firstName"
                 dense
                 class="mb-4 auth-input"
                 :placeholder="$t('caption.first_name')"
@@ -83,7 +83,7 @@
             <div class="mb-2">
               <label class="input-label">{{ $t("caption.last_name") }}</label>
               <v-text-field
-                v-model="lastName"
+                v-model="user.lastName"
                 dense
                 class="mb-4 auth-input"
                 :placeholder="$t('caption.last_name')"
@@ -94,7 +94,7 @@
             <div class="mb-2">
               <label class="input-label">{{ $t("caption.email") }}</label>
               <v-text-field
-                v-model="email"
+                v-model="user.email"
                 dense
                 class="mb-4 auth-input"
                 :placeholder="$t('caption.email')"
@@ -264,9 +264,10 @@ export default {
           loadingText: this.$t("account.updatingProfile"),
         });
 
-        const response = await this.$store.dispatch("user/updateProfile", {
+        const response = await this.$store.dispatch("user/updateUserProfile", {
           firstName: this.user.firstName,
           lastName: this.user.lastName,
+          email: this.user.email,
           preferences: {
             ...this.currentUser.preferences,
             timeZone: this.user.timeZone,
@@ -275,7 +276,7 @@ export default {
 
         this.setUser({
           ...this.currentUser,
-          ...response.data.user,
+          ...response.user,
         });
 
         showSuccessToast(this.$swal, this.$t("profileUpdated"));
@@ -342,12 +343,10 @@ export default {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.tempImageUrl = e.target.result;
-        this.$refs.cropDialog.showModalUpload();
-      };
-      reader.readAsDataURL(file);
+      // Show the crop dialog with the selected file
+      this.$refs.cropDialog.showModal = true;
+      this.$refs.cropDialog.imageFile = file;
+      this.$refs.cropDialog.prepareImageForUpload();
     },
     handleFileDrop(event) {
       const file = event.dataTransfer.files[0];
@@ -363,12 +362,10 @@ export default {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.tempImageUrl = e.target.result;
-        this.$refs.cropDialog.showModalUpload();
-      };
-      reader.readAsDataURL(file);
+      // Show the crop dialog with the selected file
+      this.$refs.cropDialog.showModal = true;
+      this.$refs.cropDialog.imageFile = file;
+      this.$refs.cropDialog.prepareImageForUpload();
     },
     async handleCroppedImage(file) {
       try {

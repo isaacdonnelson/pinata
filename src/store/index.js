@@ -10,6 +10,7 @@ import {
 import { user } from "@/store/modules/user";
 import { auth } from "@/store/modules/auth";
 import { config } from "@/store/modules/config";
+import { attachment } from "@/store/modules/attachment";
 
 Vue.use(Vuex);
 
@@ -376,6 +377,7 @@ const store = new Vuex.Store({
     },
   },
   modules: {
+    attachment,
     user,
     auth,
     config,

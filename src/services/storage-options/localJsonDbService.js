@@ -227,4 +227,12 @@ export default class LocalJsonDbService extends StorageInterface {
   async updateUserProfile(userData) {
     return this.restApi.updateUserProfile(userData);
   }
+
+  async cleanupAttachments(handle, id, relatedTo) {
+    return this.restApi.cleanupAttachments(handle, id, relatedTo);
+  }
+
+  async getSignedAttachmentUrl(handle, payload) {
+    return this.restApi.getSignedAttachmentUrl(handle, payload);
+  }
 }

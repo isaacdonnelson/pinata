@@ -105,7 +105,20 @@ export default class StorageInterface {
       "Method 'getHandlePreferences(handle)' must be implemented."
     );
   }
+
   async updateUserProfile(profile) {
     throw new Error("Method 'updateUserProfile(profile)' must be implemented.");
+  }
+
+  async cleanupAttachments(handle, id, relatedTo) {
+    throw new Error(
+      "Method 'cleanupAttachments(handle, id, relatedTo)' must be implemented."
+    );
+  }
+
+  async getSignedAttachmentUrl(handle, payload) {
+    throw new Error(
+      "Method 'getSignedAttachmentUrl(handle, payload)' must be implemented."
+    );
   }
 }

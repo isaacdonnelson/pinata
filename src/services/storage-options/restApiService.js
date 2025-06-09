@@ -658,12 +658,40 @@ export default class RestApiService extends StorageInterface {
   async updateUserProfile(profileData) {
     const url = `/profile`;
     try {
-      const response = await this.api.patch(url, profileData);
+      const response = await this.api.put(url, profileData);
       return response.data;
     } catch (error) {
       console.error(
         "Error updating user profile:",
         error.response?.data?.errors
+      );
+      throw error;
+    }
+  }
+
+  async cleanupAttachments(handle, id, relatedTo) {
+    const url = `/${handle}/attachments/${id}/${relatedTo}`;
+    try {
+      const response = await this.api.delete(url);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error cleaning up attachments:",
+        error.response?.data?.errors || error.message
+      );
+      throw error;
+    }
+  }
+
+  async getSignedAttachmentUrl(handle, payload) {
+    const url = `/${handle}/attachments`;
+    try {
+      const response = await this.api.post(url, payload);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error getting signed attachment URL:",
+        error.response?.data?.errors || error.message
       );
       throw error;
     }

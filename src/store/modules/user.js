@@ -175,6 +175,18 @@ export const user = {
       commit("setCurrentAccount", response.defaultAccount);
       return response;
     },
+    async updateUserProfile({ commit }, profileData) {
+      try {
+        const response = await this._vm.$storageService.updateUserProfile(
+          profileData
+        );
+        commit("setUser", response.user); // Update the user in Vuex state
+        return response;
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        throw error;
+      }
+    },
     logout({ commit }) {
       commit("clearUser");
     },
