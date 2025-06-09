@@ -601,13 +601,24 @@ export default class RestApiService extends StorageInterface {
   //   }
   // }
 
-  async setPassword(token, password) {
-    const url = `/auth/set-password`;
+  // async setPassword(token, password) {
+  //   const url = `/auth/set-password`;
+  //   try {
+  //     const response = await this.api.post(url, { token, password });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Set password error:", error.response?.data?.errors);
+  //     throw error;
+  //   }
+  // }
+
+  async forgotPassword(email) {
+    const url = `/forgot-password`;
     try {
-      const response = await this.api.post(url, { token, password });
+      const response = await this.api.post(url, { email });
       return response.data;
     } catch (error) {
-      console.error("Set password error:", error.response?.data?.errors);
+      console.error("Forgot password error:", error.response?.data?.errors);
       throw error;
     }
   }

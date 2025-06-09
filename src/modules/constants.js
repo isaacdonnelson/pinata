@@ -90,6 +90,7 @@ export const IPC_FUNCTIONS = {
   LOGIN_WITH_GOOGLE: "loginWithGoogle",
   GET_HANDLE_PREFERENCES: "getHandlePreferences",
   UPDATE_USER_PROFILE: "updateUserProfile",
+  FORGOT_PASSWORD: "forgotPassword",
 
   CLEANUP_ATTACHMENTS: "cleanupAttachments",
   GET_SIGNED_ATTACHMENT_URL: "getSignedAttachmentUrl",

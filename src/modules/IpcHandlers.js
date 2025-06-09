@@ -142,6 +142,8 @@ ipcMain.handle(IPC_HANDLERS.PERSISTENCE, async (event, args) => {
       return persistenceUtility.getHandlePreferences(args.data);
     case IPC_FUNCTIONS.UPDATE_USER_PROFILE:
       return persistenceUtility.updateUserProfile(args.data);
+    case IPC_FUNCTIONS.FORGOT_PASSWORD:
+      return persistenceUtility.forgotPassword(args.data);
     case IPC_FUNCTIONS.CLEANUP_ATTACHMENTS:
       return persistenceUtility.cleanupAttachments(args.data);
     case IPC_FUNCTIONS.GET_SIGNED_ATTACHMENT_URL:

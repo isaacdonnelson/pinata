@@ -187,6 +187,14 @@ export const user = {
         throw error;
       }
     },
+    async forgotPassword(email) {
+      try {
+        return await this._vm.$storageService.forgotPassword(email);
+      } catch (error) {
+        console.error("Error in forgotPassword:", error);
+        throw error;
+      }
+    },
     logout({ commit }) {
       commit("clearUser");
     },

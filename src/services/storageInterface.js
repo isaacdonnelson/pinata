@@ -110,6 +110,10 @@ export default class StorageInterface {
     throw new Error("Method 'updateUserProfile(profile)' must be implemented.");
   }
 
+  async forgotPassword(email) {
+    throw new Error("Method 'forgotPassword(email)' must be implemented.");
+  }
+
   async cleanupAttachments(handle, id, relatedTo) {
     throw new Error(
       "Method 'cleanupAttachments(handle, id, relatedTo)' must be implemented."

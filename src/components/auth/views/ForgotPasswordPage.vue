@@ -100,7 +100,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions("auth", ["forgotPassword"]),
+    ...mapActions("user", ["forgotPassword"]),
     clearError(field) {
       this.errors[field] = null;
     },
@@ -108,7 +108,7 @@ export default {
       if (this.$refs.form.validate()) {
         this.loading = true;
         try {
-          await this.forgotPassword({ email: this.email });
+          await this.$storageService.forgotPassword(this.email);
           this.snackbar = {
             show: true,
             message: "Password reset email sent. Please check your inbox.",

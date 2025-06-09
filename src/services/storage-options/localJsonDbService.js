@@ -216,6 +216,10 @@ export default class LocalJsonDbService extends StorageInterface {
     return this.restApi.setPassword(token, password);
   }
 
+  async forgotPassword(email) {
+    return this.restApi.forgotPassword(email);
+  }
+
   async refreshToken() {
     return this.restApi.refreshToken();
   }

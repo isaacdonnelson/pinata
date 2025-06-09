@@ -24,6 +24,10 @@ export default class StorageService {
     return this.storage.updateUserProfile(userData);
   }
 
+  async forgotPassword(email) {
+    return this.storage.forgotPassword(email);
+  }
+
   async checkAuth() {
     return this.storage.checkAuth();
   }
