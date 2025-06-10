@@ -707,4 +707,14 @@ export default class RestApiService extends StorageInterface {
       throw error;
     }
   }
+
+  async getUserProfile() {
+    try {
+      const response = await this.api.get("/profile");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      throw error;
+    }
+  }
 }

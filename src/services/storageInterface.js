@@ -125,4 +125,7 @@ export default class StorageInterface {
       "Method 'getSignedAttachmentUrl(handle, payload)' must be implemented."
     );
   }
+  async getUserProfile(handle) {
+    throw new Error("Method 'getUserProfile(handle)' must be implemented.");
+  }
 }

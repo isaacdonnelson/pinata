@@ -56,9 +56,9 @@ export default {
       }
     }
 
-    const credentials = await this.$storageService.getCredentials();
-    this.$store.commit("auth/setCredentials", credentials);
-    await this.updateAuth();
+    // const credentials = await this.$storageService.getCredentials();
+    // this.$store.commit("auth/setCredentials", credentials);
+    // await this.updateAuth();
   },
   async mounted() {
     if (this.renderRestoreSessionDialog && this.$isElectron) {
@@ -98,26 +98,27 @@ export default {
       }
       this.showRestoreSessionDialog = false;
     },
-    async updateAuth() {
-      if (
-        this.$store.getters["auth/credentials"] &&
-        Object.entries(this.$store.getters["auth/credentials"]).length > 0
-      ) {
-        let authCheckResponse = await this.$integrationHelpers.checkAuth(
-          this.$store.getters["auth/credentials"]
-        );
-        this.$store.commit("auth/setIsAuthenticated", authCheckResponse.authed);
-        if (authCheckResponse.failedAuth?.length > 0) {
-          // TODO - Prompt the user if they'd like to remove the failing cred
-          let message = "";
-          for (const failedCred of authCheckResponse.failedAuth) {
-            message += `${failedCred.credentialType} `;
-          }
-          message += this.$tc("message.integrations_expired", 1);
-          this.setSnackBar(message);
-        }
-      }
-    },
+    // TODO - Adapt this to new auth system with user
+    // async updateAuth() {
+    //   if (
+    //     this.$store.getters["auth/credentials"] &&
+    //     Object.entries(this.$store.getters["auth/credentials"]).length > 0
+    //   ) {
+    //     let authCheckResponse = await this.$integrationHelpers.checkAuth(
+    //       this.$store.getters["auth/credentials"]
+    //     );
+    //     this.$store.commit("auth/setIsAuthenticated", authCheckResponse.authed);
+    //     if (authCheckResponse.failedAuth?.length > 0) {
+    //       // TODO - Prompt the user if they'd like to remove the failing cred
+    //       let message = "";
+    //       for (const failedCred of authCheckResponse.failedAuth) {
+    //         message += `${failedCred.credentialType} `;
+    //       }
+    //       message += this.$tc("message.integrations_expired", 1);
+    //       this.setSnackBar(message);
+    //     }
+    //   }
+    // },
   },
 };
 </script>

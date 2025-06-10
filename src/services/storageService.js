@@ -20,8 +20,13 @@ export default class StorageService {
   async getHandlePreferences(handle) {
     return this.storage.getHandlePreferences(handle);
   }
+
   async updateUserProfile(userData) {
     return this.storage.updateUserProfile(userData);
+  }
+
+  async getUserProfile(handle) {
+    return this.storage.getUserProfile(handle);
   }
 
   async forgotPassword(email) {

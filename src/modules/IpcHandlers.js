@@ -148,6 +148,8 @@ ipcMain.handle(IPC_HANDLERS.PERSISTENCE, async (event, args) => {
       return persistenceUtility.cleanupAttachments(args.data);
     case IPC_FUNCTIONS.GET_SIGNED_ATTACHMENT_URL:
       return persistenceUtility.getSignedAttachmentUrl(args.data);
+    case IPC_FUNCTIONS.GET_USER_PROFILE:
+      return persistenceUtility.getUserProfile(args.data);
     default:
       return null;
   }

@@ -9,6 +9,8 @@ export const user = {
     signupOrgDetails: null,
     invite: null,
     redirectPath: null,
+    accounts: [],
+    isAuthenticated: false,
   }),
   mutations: {
     // TODO - needed for pinata?
@@ -89,6 +91,9 @@ export const user = {
       state.orgs = [];
       state.currentAccount = null;
       state.redirectPath = null;
+    },
+    setAuthenticated(state, isAuthenticated) {
+      state.isAuthenticated = isAuthenticated;
     },
   },
   actions: {
@@ -204,6 +209,24 @@ export const user = {
     clearRedirectPath({ commit }) {
       commit("setRedirectPath", null);
     },
+    async getUserProfile({ commit }) {
+      try {
+        const response = await this._vm.$storageService.getUserProfile();
+        if (response && response.uid) {
+          commit("setUser", response);
+          commit("setAuthenticated", true);
+          return response;
+        } else {
+          commit("setUser", null);
+          commit("setAuthenticated", false);
+          throw new Error("Failed to get user profile");
+        }
+      } catch (error) {
+        commit("setUser", null);
+        commit("setAuthenticated", false);
+        throw error;
+      }
+    },
   },
   getters: {
     getOrgs(state) {
@@ -222,7 +245,7 @@ export const user = {
         : "";
     },
     isAuthenticated(state) {
-      return !!state.user;
+      return state.isAuthenticated;
     },
     currentAccount(state) {
       return state?.currentAccount;

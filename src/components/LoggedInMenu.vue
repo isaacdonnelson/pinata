@@ -123,9 +123,9 @@ export default {
   methods: {
     logout() {
       this.showMenu = false;
-      // Clear user data
-      this.$store.commit("user/emptyState");
-      this.$store.commit("auth/setIsAuthenticated", false);
+      // Clear user data and set authentication to false
+      this.$store.dispatch("user/logout");
+      this.$store.commit("user/setAuthenticated", false);
       // Clear stored credentials
       this.$storageService.updateCredentials({});
       // Redirect to login

@@ -24,6 +24,7 @@
 <script>
 import { STATUSES } from "../modules/constants";
 import AboutDialog from "../components/dialogs/AboutDialog.vue";
+
 export default {
   name: "DefaultLayout",
 
@@ -39,7 +40,47 @@ export default {
       enabled: false,
       message: "",
     },
+    currentHandle: null,
+    currentProjectKey: null,
   }),
+
+  created() {
+    const { handle, projectKey } = this.$route.params;
+    console.log("logging");
+
+    this.$store
+      .dispatch("user/getUserProfile")
+      .then(() => {
+        // User is authenticated, proceed with project setup if needed
+        if (handle && projectKey) {
+          this.currentHandle = handle;
+          this.currentProjectKey = projectKey;
+          this.$store.commit("setCurrentProject", {
+            handle,
+            projectKey,
+          });
+        }
+        // If we're on the login page and authentication is successful, redirect to main
+        if (this.$store.getters["user/isAuthenticated"]) {
+          const storedConfig = this.$store.getters["config/fullConfig"];
+          if (!storedConfig.uid) {
+            const config = this.$storageService.createConfig();
+            this.$store.commit("config/setFullConfig", config);
+          }
+          // Only navigate to Home if we're not already there
+          if (this.$route.name !== "Home") {
+            this.$router.push({ name: "Home" });
+          }
+        }
+      })
+      .catch(() => {
+        // If getting user profile fails, redirect to login
+        if (this.$route.name !== "Login") {
+          this.$router.push({ name: "Login" });
+        }
+      });
+  },
+
   mounted() {
     // this.$root.$on("update-auth", this.updateAuth);
     this.$root.$on("set-snackbar", this.setSnackBar);
