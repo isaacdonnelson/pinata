@@ -135,7 +135,7 @@ export default {
 
     async back() {
       this.$store.commit("clearState");
-      await this.$router.push("/");
+      await this.$router.push("/main");
     },
     handleResetConfirmDialog() {
       this.resetConfirmDialog = true;

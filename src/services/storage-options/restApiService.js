@@ -41,10 +41,10 @@ export default class RestApiService extends StorageInterface {
           localStorage.setItem("orgs", JSON.stringify(null));
 
           // Redirect to login
-          router.push({ name: "Login" });
+          router.push({ path: "/login" });
         }
         if (status === 423) {
-          router.push({ name: "Maintenance" });
+          router.push({ path: "/maintenance" });
         }
         return Promise.reject(error);
       }
@@ -128,7 +128,7 @@ export default class RestApiService extends StorageInterface {
       name: state.case.title,
       source: "pinata",
       projectKey: state.case.key || null,
-      parentId: state.case.parentId || 0,
+      // parentId: state.case.parentId || 0, //TODO -  In the future, we need a flow in the UI for choosing a folder.
       templateId: state.case.templateId || null,
       priority: state.case.priority,
       steps: [],

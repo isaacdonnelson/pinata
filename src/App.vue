@@ -85,7 +85,7 @@ export default {
         ) {
           this.$electronService.setWindowSize({ width: 1440, height: 900 });
         }
-        if (this.stateToRestore.session.path !== "/authentication/signinJira") {
+        if (this.stateToRestore.session.path !== "/login") {
           await this.$router.push({ path: this.stateToRestore.session.path });
         }
       }
@@ -93,8 +93,8 @@ export default {
     },
     async clearSession() {
       this.$store.commit("clearState");
-      if (this.$router.history.current.path !== "/") {
-        await this.$router.push("/");
+      if (this.$router.history.current.path !== "/login") {
+        await this.$router.push("/login");
       }
       this.showRestoreSessionDialog = false;
     },

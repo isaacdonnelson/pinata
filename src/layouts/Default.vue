@@ -48,37 +48,44 @@ export default {
     const { handle, projectKey } = this.$route.params;
     console.log("logging");
 
-    this.$store
-      .dispatch("user/getUserProfile")
-      .then(() => {
-        // User is authenticated, proceed with project setup if needed
-        if (handle && projectKey) {
-          this.currentHandle = handle;
-          this.currentProjectKey = projectKey;
-          this.$store.commit("setCurrentProject", {
-            handle,
-            projectKey,
+    // only run if not in electron and linked from the TF app
+    if (!this.$isElectron) {
+      console.log("Not in Electron, checking authentication...");
+      console.log("HERE 1 PATH " + this.$router.history.current.path);
+      if (this.$router.history.current.path.startsWith("/auth")) {
+        console.log("HERE");
+        this.$store
+          .dispatch("user/getUserProfile")
+          .then(() => {
+            // User is authenticated, proceed with project setup if needed
+            if (handle && projectKey) {
+              this.currentHandle = handle;
+              this.currentProjectKey = projectKey;
+              this.$store.commit("setCurrentProject", {
+                handle,
+                projectKey,
+              });
+            }
+            // If we're on the login page and authentication is successful, redirect to main
+            if (this.$store.getters["user/isAuthenticated"]) {
+              const storedConfig = this.$store.getters["config/fullConfig"];
+              if (!storedConfig.uid) {
+                const config = this.$storageService.createConfig();
+                this.$store.commit("config/setFullConfig", config);
+              }
+              // Only navigate to Home if we're not already there
+              if (this.$route.name !== "Home") {
+                this.$router.push({ path: "/home" });
+              }
+            }
+          })
+          .catch(() => {
+            this.$router.push({ path: "/login" });
           });
-        }
-        // If we're on the login page and authentication is successful, redirect to main
-        if (this.$store.getters["user/isAuthenticated"]) {
-          const storedConfig = this.$store.getters["config/fullConfig"];
-          if (!storedConfig.uid) {
-            const config = this.$storageService.createConfig();
-            this.$store.commit("config/setFullConfig", config);
-          }
-          // Only navigate to Home if we're not already there
-          if (this.$route.name !== "Home") {
-            this.$router.push({ name: "Home" });
-          }
-        }
-      })
-      .catch(() => {
-        // If getting user profile fails, redirect to login
-        if (this.$route.name !== "Login") {
-          this.$router.push({ name: "Login" });
-        }
-      });
+      } else {
+        this.$router.push({ path: "/login" });
+      }
+    }
   },
 
   mounted() {

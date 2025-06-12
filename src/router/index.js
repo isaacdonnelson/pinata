@@ -39,16 +39,16 @@ Vue.use(VueRouter);
 
 // TODO: Uncomment and implement the authentication guard logic
 // Public routes that don't require authentication
-// const publicRoutes = [
-//   "/login",
-//   "/register",
-//   "/forgot-password",
-//   "/reset-password",
-//   "/invite",
-//   "/email-confirmation",
-//   "/verify-email",
-//   "/create-password",
-// ];
+const publicRoutes = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/invite",
+  "/email-confirmation",
+  "/verify-email",
+  "/create-password",
+];
 
 const routes = [
   {
@@ -116,7 +116,7 @@ const routes = [
   },
   {
     path: "/main",
-    name: "main",
+    name: "Main",
     component: MainView,
     meta: { requiresAuth: true },
     children: [{ path: "workspace" }, { path: "workspace/:execID" }],
@@ -215,41 +215,37 @@ const routes = [
 
 // TODO: verify why process.env.IS_ELECTRON is not working
 const router = new VueRouter({
-  mode: navigator.userAgent.includes("Electron") ? "hash" : "history",
+  mode: process.env.IS_ELECTRON ? "hash" : "history",
   base: process.env.BASE_URL,
   routes,
 });
 
-// TODO: Uncomment and implement the authentication guard logic
-// Simplified beforeEach guard
-// router.beforeEach(async (to, from, next) => {
-// const isAuthenticated = store.getters["user/isAuthenticated"];
-// const isPublicRoute = publicRoutes.some((route) => to.path.startsWith(route));
+// Authentication guard
+router.beforeEach(async (to, from, next) => {
+  const isAuthenticated = store.getters["user/isAuthenticated"];
+  const isPublicRoute = publicRoutes.some((route) => to.path.startsWith(route));
 
-// // Handle root path
-// if (to.path === "/") {
-//   if (isAuthenticated) {
-//     return next();
-//   }
-//   return next({ name: "Login" });
-// }
+  // Handle root path
+  if (to.path === "/") {
+    return next({ path: isAuthenticated ? "/home" : "/login" });
+  }
 
-// // If user is authenticated and trying to access auth pages, redirect to home
-// if (isAuthenticated && isPublicRoute && to.path !== "/") {
-//   return next({ name: "Home" });
-// }
+  // Handle protected routes
+  if (
+    to.matched.some((record) => record.meta.requiresAuth) &&
+    !isAuthenticated
+  ) {
+    store.commit("user/setRedirectPath", to.fullPath);
+    return next({ path: "/login" });
+  }
 
-// // If route requires auth and user is not authenticated, redirect to login
-// if (
-//   to.matched.some((record) => record.meta.requiresAuth) &&
-//   !isAuthenticated
-// ) {
-//   store.commit("user/setRedirectPath", to.fullPath);
-//   return next({ name: "Login" });
-// }
+  // Handle public routes for authenticated users
+  if (isAuthenticated && isPublicRoute) {
+    return next({ path: "/home" });
+  }
 
-// next();
-// });
+  next();
+});
 
 // Session path tracking
 router.beforeEach((to, from, next) => {

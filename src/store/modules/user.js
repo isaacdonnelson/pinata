@@ -33,15 +33,7 @@ export const user = {
     validateGoogleSignUp(state, token) {
       return this._vm.$storageService.validateGoogleSignUp(token);
     },
-    registerUser(state, user) {
-      state.user = user;
-      this._vm.$storageService.registerUser(user);
-    },
-    setLoginState(state, { user, orgs, currentAccount }) {
-      state.user = user;
-      state.orgs = orgs;
-      state.currentAccount = currentAccount;
-    },
+
     setUser(state, user) {
       state.user = user;
     },
@@ -91,8 +83,10 @@ export const user = {
       state.orgs = [];
       state.currentAccount = null;
       state.redirectPath = null;
+      state.isAuthenticated = false;
     },
     setAuthenticated(state, isAuthenticated) {
+      console.log("authenticated?? " + isAuthenticated);
       state.isAuthenticated = isAuthenticated;
     },
   },
@@ -165,20 +159,36 @@ export const user = {
       }
     },
     async loginUser({ commit }, credentials) {
-      const response = await this._vm.$storageService.loginUser(credentials);
-      commit("setLoginState", {
-        user: response.user,
-        orgs: response.orgs,
-        currentAccount: response.defaultAccount,
-      });
-      return response;
+      try {
+        const response = await this._vm.$storageService.loginUser(credentials);
+        commit("setUser", response.user);
+        commit("setOrgs", response.orgs || []);
+        commit("setCurrentAccount", response.defaultAccount);
+        commit("setAuthenticated", true);
+        return response;
+      } catch (error) {
+        commit("setUser", null);
+        commit("setOrgs", null);
+        commit("setCurrentAccount", null);
+        commit("setAuthenticated", false);
+        throw error;
+      }
     },
     async registerUser({ commit }, userData) {
-      const response = await this._vm.$storageService.registerUser(userData);
-      commit("setUser", response.user);
-      commit("setOrgs", response.orgs || []);
-      commit("setCurrentAccount", response.defaultAccount);
-      return response;
+      try {
+        const response = await this._vm.$storageService.registerUser(userData);
+        commit("setUser", response.user);
+        commit("setOrgs", response.orgs || []);
+        commit("setCurrentAccount", response.defaultAccount);
+        commit("setAuthenticated", true);
+        return response;
+      } catch (error) {
+        commit("setUser", null);
+        commit("setOrgs", null);
+        commit("setCurrentAccount", null);
+        commit("setAuthenticated", false);
+        throw error;
+      }
     },
     async updateUserProfile({ commit }, profileData) {
       try {

@@ -332,57 +332,69 @@ export default {
       this.errors[field] = null;
     },
     async handleSignup() {
-      // if (this.$refs.form.validate()) {
-      this.signupBtnLoading = true;
-      const userData = {
-        firstName: this.user.firstName,
-        lastName: this.user.lastName,
-        email: this.user.email,
-        handle: this.user.handle,
-        password: this.user.password,
-      };
-      try {
-        // Register user
-        await this.$store.dispatch("user/registerUser", userData);
-
-        // Create config for the new user
-        const config = await this.$storageService.createConfig();
-        this.$store.commit("config/setFullConfig", config);
-
-        // Show success message
-        this.snackbar = {
-          show: true,
-          message: "Registration successful!",
-          color: "success",
+      if (this.$refs.form.validate()) {
+        this.signupBtnLoading = true;
+        const userData = {
+          firstName: this.user.firstName,
+          lastName: this.user.lastName,
+          email: this.user.email,
+          handle: this.user.handle,
+          password: this.user.password,
         };
+        try {
+          // Register user and get response
+          const response = await this.$store.dispatch(
+            "user/registerUser",
+            userData
+          );
 
-        // Navigate to home
-        this.$router.push({
-          name: "Home",
-          query: userData,
-        });
-      } catch (error) {
-        // Handle validation errors
-        if (error.response?.data?.errors) {
-          const { errors } = error.response.data;
-          this.errors = {
-            firstName: errors.firstName,
-            lastName: errors.lastName,
-            email: errors.email,
-            username: errors.handle,
-            password: errors.password,
-            confirmPassword: errors.confirmPassword,
-          };
-        } else {
-          // Show generic error
+          // Initialize session with the registered user data
+          await this.$store.dispatch("user/initSession", {
+            user: response.user,
+            currentAccount: {
+              handle: response.user.handle,
+              type: "user",
+              name: `${response.user.firstName} ${response.user.lastName}`,
+              roleName: "owner",
+            },
+          });
+
+          // Create config for the new user
+          const config = await this.$storageService.createConfig();
+          this.$store.commit("config/setFullConfig", config);
+
+          // Show success message
           this.snackbar = {
             show: true,
-            message: error.response?.data?.message || "Registration failed",
-            color: "error",
+            message: "Registration successful!",
+            color: "success",
           };
+
+          // Navigate to home after session is initialized
+          await this.$router.push({ path: "/home" });
+        } catch (error) {
+          // Handle validation errors
+          if (error.response?.data?.errors) {
+            const { errors } = error.response.data;
+            this.errors = {
+              firstName: errors.firstName,
+              lastName: errors.lastName,
+              email: errors.email,
+              username: errors.handle,
+              password: errors.password,
+              confirmPassword: errors.confirmPassword,
+            };
+          } else {
+            // Show generic error
+            this.snackbar = {
+              show: true,
+              message: error.response?.data?.message || "Registration failed",
+              color: "error",
+            };
+          }
+        } finally {
+          this.signupBtnLoading = false;
         }
-      } finally {
-        this.signupBtnLoading = false;
       }
     },
     signupWithGoogle() {

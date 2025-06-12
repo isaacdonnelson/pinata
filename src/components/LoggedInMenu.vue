@@ -67,9 +67,9 @@
           </v-list-item>
         </v-list>
 
-        <v-divider></v-divider>
+        <v-divider v-if="!this.$isElectron"></v-divider>
 
-        <v-list>
+        <v-list v-if="!this.$isElectron">
           <v-list-item @click="logout">
             <v-list-item-icon>
               <v-icon>mdi-logout</v-icon>
@@ -104,14 +104,17 @@ export default {
       currentAccount: "user/currentAccount",
     }),
     userName() {
-      return this.currentUser?.name || this.currentAccount?.name || "User";
+      if (this.currentUser?.firstName && this.currentUser?.lastName) {
+        return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+      }
+      return this.currentAccount?.name || "User";
     },
     userEmail() {
       return this.currentUser?.email || this.currentAccount?.email || "";
     },
     profileAvatar() {
-      if (this.currentUser?.avatar_url) {
-        return this.currentUser.avatar_url;
+      if (this.currentUser?.avatarUrl) {
+        return this.currentUser.avatarUrl;
       }
       // Generate a default avatar based on user's name
       const name = this.userName;
@@ -121,15 +124,18 @@ export default {
     },
   },
   methods: {
-    logout() {
+    async logout() {
       this.showMenu = false;
-      // Clear user data and set authentication to false
-      this.$store.dispatch("user/logout");
-      this.$store.commit("user/setAuthenticated", false);
-      // Clear stored credentials
-      this.$storageService.updateCredentials({});
-      // Redirect to login
-      this.$router.push("/login");
+      try {
+        await this.$store.dispatch("user/logout");
+        this.$store.commit("user/setUser", null);
+        this.$store.commit("user/setOrgs", null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("orgs");
+        this.$router.push("/login").catch(() => {});
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
     },
   },
 };

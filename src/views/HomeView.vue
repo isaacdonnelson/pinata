@@ -386,7 +386,7 @@ export default {
     async newSession() {
       this.$store.commit("clearState");
       this.$store.commit("setSessionQuickTest", false);
-      if (this.$router.history.current.path === "/") {
+      if (this.$router.history.current.path === "/home") {
         await this.$router.push("/main");
       }
     },
