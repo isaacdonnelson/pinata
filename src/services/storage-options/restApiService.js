@@ -31,17 +31,19 @@ export default class RestApiService extends StorageInterface {
       (response) => response,
       (error) => {
         const status = error.response?.status;
-        if (status === 401 && router.currentRoute.name !== "Login") {
+        if (status === 401) {
           // Clear user data from store
           store.commit("user/setUser", null);
           store.commit("user/setOrgs", null);
-
+          store.commit("user/clearUser");
           // Clear user data from localStorage but preserve currentAccount
           localStorage.setItem("user", JSON.stringify(null));
           localStorage.setItem("orgs", JSON.stringify(null));
 
           // Redirect to login
-          router.push({ path: "/login" });
+          if (router.currentRoute.name !== "Login") {
+            router.push({ path: "/login" });
+          }
         }
         if (status === 423) {
           router.push({ path: "/maintenance" });
@@ -51,9 +53,16 @@ export default class RestApiService extends StorageInterface {
     );
   }
 
+  get handle() {
+    return store.state.user.currentAccount?.handle || "defaultHandle";
+  }
+
+  get projectKey() {
+    return store.state.user.currentAccount?.projectKey || "defaultProjectKey";
+  }
+
   async getState(executionId) {
-    const handle = "idonn01";
-    const url = `/${handle}/projects/project1/executions/${executionId}`;
+    const url = `/${this.handle}/projects/${this.projectKey}/executions/${executionId}`;
 
     try {
       const { data } = await this.api.get(url);
@@ -67,10 +76,8 @@ export default class RestApiService extends StorageInterface {
   }
 
   async updateState(state) {
-    const handle = "idonn01";
-    const projectKey = "PROJECTKEY";
     const executionId = state.session.sessionID;
-    const url = `/${handle}/projects/${projectKey}/executions/${executionId}`;
+    const url = `/${this.handle}/projects/${this.projectKey}/executions/${executionId}`;
 
     const data = {
       name: state.case.title,
@@ -120,9 +127,7 @@ export default class RestApiService extends StorageInterface {
   }
 
   async createTestCase(state) {
-    const handle = "idonn01";
-    const projectKey = "PROJECTKEY";
-    const url = `/${handle}/projects/${projectKey}/cases`;
+    const url = `/${this.handle}/projects/${this.projectKey}/cases`;
 
     const testCasePayload = {
       name: state.case.title,
@@ -167,9 +172,7 @@ export default class RestApiService extends StorageInterface {
   }
 
   async createExecutionWithCase(state) {
-    const handle = "idonn01";
-    const projectKey = "PROJECTKEY";
-    const url = `/${handle}/projects/${projectKey}/executions`;
+    const url = `/${this.handle}/projects/${this.projectKey}/executions`;
 
     const executionPayload = {
       name: state.case.title,
@@ -269,13 +272,11 @@ export default class RestApiService extends StorageInterface {
     console.log(data);
   }
   async resetData(state) {
-    const handle = "idonn01";
-    const projectKey = "PROJECTKEY";
     const executionId = state.session.sessionID;
     const caseId = state.case.caseID;
 
-    const executionUrl = `/${handle}/projects/${projectKey}/executions/${executionId}`;
-    const caseUrl = `/${handle}/projects/${projectKey}/cases/${caseId}`;
+    const executionUrl = `/${this.handle}/projects/${this.projectKey}/executions/${executionId}`;
+    const caseUrl = `/${this.handle}/projects/${this.projectKey}/cases/${caseId}`;
 
     if (executionId && caseId) {
       try {
@@ -294,8 +295,7 @@ export default class RestApiService extends StorageInterface {
   async getMetaData() {}
 
   async createConfig() {
-    const handle = "idonn01";
-    const url = `/${handle}/pinata/configs`;
+    const url = `/${this.handle}/pinata/configs`;
 
     const payload = {
       localOnly: false,
@@ -412,14 +412,8 @@ export default class RestApiService extends StorageInterface {
     }
   }
   async getConfig(config) {
-    const handle = "idonn01";
     const configId = config.uid;
-    if (!handle) {
-      throw new Error(
-        "Organization handle is not defined. Ensure the user is logged in."
-      );
-    }
-    const url = `/${handle}/pinata/configs/${configId}`;
+    const url = `/${this.handle}/pinata/configs/${configId}`;
     try {
       const { data } = await this.api.get(url);
       if (!data) {
@@ -435,9 +429,8 @@ export default class RestApiService extends StorageInterface {
   }
 
   async updateConfig(config) {
-    const handle = "idonn01";
     const configId = config.uid;
-    const url = `/${handle}/pinata/configs/${configId}`;
+    const url = `/${this.handle}/pinata/configs/${configId}`;
 
     try {
       const { data } = await this.api.patch(url, config);
@@ -457,8 +450,7 @@ export default class RestApiService extends StorageInterface {
 
   // TODO: Needed? Never called.
   async getAttachment(type, attachmentId) {
-    const handle = "idonn01";
-    const url = `/${handle}/${type}/attachments/${attachmentId}/object`;
+    const url = `/${this.handle}/${type}/attachments/${attachmentId}/object`;
 
     try {
       const { data } = await this.api.get(url);
@@ -561,7 +553,7 @@ export default class RestApiService extends StorageInterface {
   }
 
   async logout() {
-    const url = `/auth/logout`;
+    const url = `/logout`;
     try {
       const response = await this.api.post(url);
       return response.data;
@@ -681,7 +673,7 @@ export default class RestApiService extends StorageInterface {
   }
 
   async cleanupAttachments(handle, id, relatedTo) {
-    const url = `/${handle}/attachments/${id}/${relatedTo}`;
+    const url = `/${this.handle}/attachments/${id}/${relatedTo}`;
     try {
       const response = await this.api.delete(url);
       return response.data;
@@ -695,7 +687,7 @@ export default class RestApiService extends StorageInterface {
   }
 
   async getSignedAttachmentUrl(handle, payload) {
-    const url = `/${handle}/attachments`;
+    const url = `/${this.handle}/attachments`;
     try {
       const response = await this.api.post(url, payload);
       return response.data;

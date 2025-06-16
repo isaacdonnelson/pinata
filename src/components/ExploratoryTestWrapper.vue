@@ -135,7 +135,10 @@ export default {
 
     async back() {
       this.$store.commit("clearState");
-      await this.$router.push("/main");
+      const currentPath = this.$router.history.current.path;
+      if (currentPath !== "/home") {
+        await this.$router.push("/home");
+      }
     },
     handleResetConfirmDialog() {
       this.resetConfirmDialog = true;

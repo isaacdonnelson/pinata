@@ -8,7 +8,6 @@ export const user = {
     currentAccount: null,
     signupOrgDetails: null,
     invite: null,
-    redirectPath: null,
     accounts: [],
     isAuthenticated: false,
   }),
@@ -75,14 +74,10 @@ export const user = {
         state.user.avatar_url = url;
       }
     },
-    setRedirectPath(state, path) {
-      state.redirectPath = path;
-    },
     clearUser(state) {
       state.user = null;
       state.orgs = [];
       state.currentAccount = null;
-      state.redirectPath = null;
       state.isAuthenticated = false;
     },
     setAuthenticated(state, isAuthenticated) {
@@ -210,14 +205,9 @@ export const user = {
         throw error;
       }
     },
-    logout({ commit }) {
+    async logout({ commit }) {
       commit("clearUser");
-    },
-    getRedirectPath({ state }) {
-      return state.redirectPath;
-    },
-    clearRedirectPath({ commit }) {
-      commit("setRedirectPath", null);
+      await this._vm.$storageService.logout();
     },
     async getUserProfile({ commit }) {
       try {
@@ -316,6 +306,5 @@ export const user = {
         ? state.user.orgAuthzPermissions
         : state.orgs[orgIndex].orgAuthzPermissions;
     },
-    redirectPath: (state) => state.redirectPath,
   },
 };

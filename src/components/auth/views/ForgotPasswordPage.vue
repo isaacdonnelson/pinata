@@ -4,14 +4,19 @@
     <div class="content-container">
       <div class="content">
         <div class="login-wrapper pa-6">
-          <div class="d-flex justify-center align-center mb-8">
-            <router-link to="/">
+          <div class="header-container">
+            <router-link to="/login" class="d-flex align-center back-link">
+              <v-icon color="#0C2FF3">mdi-chevron-left</v-icon>
+              <span class="back-text">Back</span>
+            </router-link>
+            <router-link to="/" class="logo-link">
               <img src="@/assets/logo.svg" alt="Pinata" height="32" />
             </router-link>
+            <div class="header-spacer"></div>
           </div>
 
           <div v-if="!showConfirmation" class="text-center login-header mb-8">
-            Forgot password
+            Password Recovery
           </div>
 
           <v-form
@@ -302,5 +307,43 @@ export default {
 
 .resend-link:hover {
   text-decoration: underline;
+}
+
+.back-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.back-text {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #0c2ff3;
+  margin-left: 4px;
+}
+
+.logo-link {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.header-spacer {
+  visibility: hidden;
+  pointer-events: none;
 }
 </style>

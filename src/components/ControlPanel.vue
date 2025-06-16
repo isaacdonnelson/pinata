@@ -1874,7 +1874,7 @@ export default {
     },
     async finishSession() {
       this.$store.commit("clearState");
-      await this.$router.push("/main");
+      await this.$router.push("/home");
     },
     async resetSession() {
       if (this.resetConfirmDialog) {

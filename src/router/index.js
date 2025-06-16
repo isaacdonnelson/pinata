@@ -37,19 +37,6 @@ import CreatePasswordPage from "@/components/auth/views/CreatePasswordPage.vue";
 
 Vue.use(VueRouter);
 
-// TODO: Uncomment and implement the authentication guard logic
-// Public routes that don't require authentication
-const publicRoutes = [
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/invite",
-  "/email-confirmation",
-  "/verify-email",
-  "/create-password",
-];
-
 const routes = [
   {
     path: "/",
@@ -104,7 +91,30 @@ const routes = [
         path: "/auth/:handle/:projectKey",
         name: "Auth",
         props: true,
-        // meta: { requiresAuth: true },
+        beforeEnter: async (to, from, next) => {
+          const { handle, projectKey } = to.params;
+          try {
+            await store.dispatch("user/getUserProfile");
+            if (handle && projectKey) {
+              // todo: Uncomment and implement the logic to set the current project
+              // store.commit("setCurrentProject", { handle, projectKey });
+            }
+            if (store.getters["user/isAuthenticated"]) {
+              const storedConfig = store.getters["config/fullConfig"];
+              console.log("Stored Config:", storedConfig);
+              if (!storedConfig.uid) {
+                console.log("Creating new config...");
+                const config = store.dispatch("config/createConfig");
+                store.commit("config/setFullConfig", config);
+              }
+              next({ path: "/home" });
+            } else {
+              next({ path: "/login" });
+            }
+          } catch {
+            next({ path: "/login" });
+          }
+        },
       },
     ],
   },
@@ -112,19 +122,16 @@ const routes = [
     path: "/home",
     name: "Home",
     component: HomeView,
-    meta: { requiresAuth: true },
   },
   {
     path: "/main",
     name: "Main",
     component: MainView,
-    meta: { requiresAuth: true },
     children: [{ path: "workspace" }, { path: "workspace/:execID" }],
   },
   {
     path: "/settings",
     component: SettingView,
-    meta: { requiresAuth: true },
     children: [
       {
         path: "/",
@@ -192,13 +199,11 @@ const routes = [
     path: "/result",
     name: "result",
     component: ResultView,
-    meta: { requiresAuth: true },
   },
   {
     path: "/print",
     name: "print",
     component: PrintView,
-    meta: { requiresAuth: true },
   },
   {
     path: "/minimize",
@@ -206,16 +211,15 @@ const routes = [
     meta: { layout: "minimize" },
     component: LowProfileView,
   },
-  // Catch all route - 404
   {
     path: "*",
     redirect: "/",
   },
 ];
 
-// TODO: verify why process.env.IS_ELECTRON is not working
+const isElectron = process.env.IS_ELECTRON === "true";
 const router = new VueRouter({
-  mode: process.env.IS_ELECTRON ? "hash" : "history",
+  mode: isElectron ? "hash" : "history",
   base: process.env.BASE_URL,
   routes,
 });
@@ -223,24 +227,39 @@ const router = new VueRouter({
 // Authentication guard
 router.beforeEach(async (to, from, next) => {
   const isAuthenticated = store.getters["user/isAuthenticated"];
-  const isPublicRoute = publicRoutes.some((route) => to.path.startsWith(route));
+  const authPages = [
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/invite",
+    "/email-confirmation",
+    "/verify-email",
+    "/create-password",
+  ];
 
-  // Handle root path
+  // Handle root path - redirect to appropriate landing page if user is authenticated
   if (to.path === "/") {
-    return next({ path: isAuthenticated ? "/home" : "/login" });
+    const targetPath = isAuthenticated ? "/home" : "/login";
+    if (to.path !== targetPath) {
+      return next({ path: targetPath });
+    }
   }
 
-  // Handle protected routes
+  // Block unauthenticated users from accessing protected routes
   if (
-    to.matched.some((record) => record.meta.requiresAuth) &&
-    !isAuthenticated
+    !isAuthenticated &&
+    !authPages.some((route) => to.path.startsWith(route))
   ) {
-    store.commit("user/setRedirectPath", to.fullPath);
     return next({ path: "/login" });
   }
 
-  // Handle public routes for authenticated users
-  if (isAuthenticated && isPublicRoute) {
+  // Redirect authenticated users away from auth pages (login, register, etc..)
+  if (isAuthenticated && authPages.some((route) => to.path.startsWith(route))) {
+    // If there's a previous route and it's not an auth page, go back to it
+    if (from.path && !authPages.some((route) => from.path.startsWith(route))) {
+      return next({ path: from.path });
+    }
     return next({ path: "/home" });
   }
 

@@ -205,13 +205,6 @@ export default {
               email: this.$route.query.email,
               password: this.password,
             });
-
-            // Wait for snackbar to show before redirecting
-            setTimeout(() => {
-              const redirectPath =
-                this.$store.getters["auth/redirectPath"] || "/workspace";
-              this.$router.push(redirectPath);
-            }, 1500);
           } catch (loginError) {
             console.error("Auto-login failed:", loginError);
             // If auto-login fails, redirect to login page

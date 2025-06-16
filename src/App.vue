@@ -93,8 +93,8 @@ export default {
     },
     async clearSession() {
       this.$store.commit("clearState");
-      if (this.$router.history.current.path !== "/login") {
-        await this.$router.push("/login");
+      if (this.$router.history.current.path !== "/home") {
+        await this.$router.push("/home");
       }
       this.showRestoreSessionDialog = false;
     },
