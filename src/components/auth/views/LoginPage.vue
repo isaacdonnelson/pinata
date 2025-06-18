@@ -185,6 +185,7 @@ export default {
           );
 
           // Check for saved account preference
+          // TODO: handle org response - this is in place for when orgs are implemented in settings
           const savedAccount = this.getCurrentAccount();
           let finalAccount = response.defaultAccount;
 
@@ -200,18 +201,10 @@ export default {
           showSuccessToast(this.$swal, this.$t("loginSuccess"));
 
           // Get the intended destination or default to home
-          const intendedRoute = this.$route.query.redirect || {
+          this.$router.push({
             name: "Home",
             params: { handle: finalAccount.handle },
-          };
-
-          // If the intended route is a string (path), convert it to a route object
-          const destination =
-            typeof intendedRoute === "string"
-              ? { path: intendedRoute }
-              : intendedRoute;
-
-          this.$router.replace(destination);
+          });
         } catch (error) {
           showErrorToast(
             this.$swal,

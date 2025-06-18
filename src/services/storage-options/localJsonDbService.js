@@ -21,9 +21,10 @@ export default class LocalJsonDbService extends StorageInterface {
     });
   }
 
-  async createConfig() {
+  async createConfig(config) {
     return await window.ipc.invoke(IPC_HANDLERS.PERSISTENCE, {
       func: IPC_FUNCTIONS.CREATE_CONFIG,
+      data: config,
     });
   }
 
@@ -180,6 +181,7 @@ export default class LocalJsonDbService extends StorageInterface {
     });
   }
 
+  // The below methods are called in both the desktop and web app
   async loginUser(credentials) {
     return this.restApi.loginUser(credentials);
   }
@@ -224,8 +226,8 @@ export default class LocalJsonDbService extends StorageInterface {
     return this.restApi.refreshToken();
   }
 
-  async getHandlePreferences(handle) {
-    return this.restApi.getHandlePreferences(handle);
+  async getHandlePreferences() {
+    return this.restApi.getHandlePreferences();
   }
 
   async updateUserProfile(userData) {

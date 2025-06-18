@@ -34,25 +34,11 @@ export default {
     },
   },
   async created() {
-    if (this.$router.history.current.path === "/") {
+    if (this.$router.history.current.path === "/home") {
       this.renderRestoreSessionDialog = true;
       if (this.$isElectron) {
         const { message } = await this.$electronService.deleteSession("old");
         console.log("Session Clear : ", message);
-      }
-    }
-    // Check if the app is running in Electron
-    // if in electron, load the config from the storage service
-    if (this.$isElectron) {
-      const config = await this.$storageService.getConfig();
-      this.$store.commit("config/setFullConfig", config);
-    } else {
-      // If not running in Electron, check if the config exists
-      // in the store and create a new config if it does not
-      const storedConfig = this.$store.getters["config/fullConfig"];
-      if (!storedConfig.uid) {
-        const config = await this.$storageService.createConfig();
-        this.$store.commit("config/setFullConfig", config);
       }
     }
 

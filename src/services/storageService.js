@@ -17,8 +17,8 @@ export default class StorageService {
     return this.storage.logout();
   }
 
-  async getHandlePreferences(handle) {
-    return this.storage.getHandlePreferences(handle);
+  async getHandlePreferences() {
+    return this.storage.getHandlePreferences();
   }
 
   async updateUserProfile(userData) {
@@ -61,8 +61,8 @@ export default class StorageService {
     return this.storage.updateState(state);
   }
 
-  async createConfig() {
-    return await this.storage.createConfig();
+  async createConfig(config) {
+    return await this.storage.createConfig(config);
   }
 
   async getConfig(config) {
@@ -171,5 +171,13 @@ export default class StorageService {
 
   async getSignedAttachmentUrl(handle, payload) {
     return this.storage.getSignedAttachmentUrl(handle, payload);
+  }
+
+  async getProject() {
+    return await this.storage.getProject();
+  }
+
+  async getProfile() {
+    return await this.storage.getProfile();
   }
 }

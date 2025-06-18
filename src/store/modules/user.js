@@ -1,5 +1,3 @@
-import { showErrorToast } from "@/utils/toast";
-
 export const user = {
   namespaced: true,
   state: () => ({
@@ -32,7 +30,6 @@ export const user = {
     validateGoogleSignUp(state, token) {
       return this._vm.$storageService.validateGoogleSignUp(token);
     },
-
     setUser(state, user) {
       state.user = user;
     },
@@ -86,27 +83,14 @@ export const user = {
     },
   },
   actions: {
-    async getHandlePreferences({ commit }, { handle, accountType }) {
-      try {
-        const response = await this._vm.$storageService.getHandlePreferences(
-          handle
-        );
-        const preferencesData = response.data.preferences || response.data;
+    async getHandlePreferences({ commit }) {
+      const response = await this._vm.$storageService.getHandlePreferences();
+      const preferencesData = response.data.preferences || response.data;
 
-        const timestamp = new Date().getTime();
-        commit("setUserPreferences", {
-          preferences: { ...preferencesData, timestamp },
-          type: accountType,
-          handle,
-        });
-      } catch (err) {
-        console.error("Error fetching handle preferences:", err);
-        showErrorToast(
-          "fetchError",
-          { item: "preferences" },
-          err?.response?.data
-        );
-      }
+      const timestamp = new Date().getTime();
+      commit("setUserPreferences", {
+        preferences: { ...preferencesData, timestamp },
+      });
     },
     setCurrentAccount({ commit }, currentAccount) {
       commit("setCurrentAccount", currentAccount);

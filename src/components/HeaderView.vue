@@ -89,7 +89,7 @@
         <div class="d-flex justify-end align-center">
           <div class="avatar">
             <div v-if="isAuthenticated">
-              <LoggedInMenu />
+              <LoggedInMenu :disabledRoutes="isDisabled" />
             </div>
             <div v-else>
               <v-menu
@@ -153,6 +153,7 @@ export default {
     this.$root.$off("toggle-sidebar", this.toggleSidebar);
     this.$root.$off("set-sidebar", this.setSidebarActive);
   },
+  // Disables unneccesary routes in header when in workspace
   watch: {
     "$route.path"(newPath) {
       this.isDisabled = this.isWorkspace(newPath);

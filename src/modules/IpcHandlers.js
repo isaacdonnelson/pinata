@@ -139,7 +139,7 @@ ipcMain.handle(IPC_HANDLERS.PERSISTENCE, async (event, args) => {
     case IPC_FUNCTIONS.LOGIN_WITH_GOOGLE:
       return persistenceUtility.loginWithGoogle();
     case IPC_FUNCTIONS.GET_HANDLE_PREFERENCES:
-      return persistenceUtility.getHandlePreferences(args.data);
+      return persistenceUtility.getHandlePreferences();
     case IPC_FUNCTIONS.UPDATE_USER_PROFILE:
       return persistenceUtility.updateUserProfile(args.data);
     case IPC_FUNCTIONS.FORGOT_PASSWORD:

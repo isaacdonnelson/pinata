@@ -359,19 +359,14 @@ export default {
             },
           });
 
-          // Create config for the new user
-          const config = await this.$storageService.createConfig();
-          this.$store.commit("config/setFullConfig", config);
-
           // Show success message
           this.snackbar = {
             show: true,
             message: "Registration successful!",
             color: "success",
           };
-
-          // Navigate to home after session is initialized
-          await this.$router.push({ path: "/home" });
+          // Navigate to home regardless of config creation success
+          await this.$router.push({ path: "/setup" });
         } catch (error) {
           // Handle validation errors
           if (error.response?.data?.errors) {

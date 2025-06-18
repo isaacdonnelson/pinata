@@ -36,8 +36,8 @@ export default class StorageInterface {
     throw new Error("Method 'updateState()' must be implemented.");
   }
 
-  async createConfig() {
-    throw new Error("Method 'createConfig()' must be implemented.");
+  async createConfig(config) {
+    throw new Error("Method 'createConfig(config)' must be implemented.");
   }
 
   async getConfig(config) {
@@ -100,10 +100,8 @@ export default class StorageInterface {
     throw new Error("Method 'getOrgs(userId)' must be implemented.");
   }
 
-  async getHandlePreferences(handle) {
-    throw new Error(
-      "Method 'getHandlePreferences(handle)' must be implemented."
-    );
+  async getHandlePreferences() {
+    throw new Error("Method 'getHandlePreferences()' must be implemented.");
   }
 
   async updateUserProfile(profile) {
@@ -127,5 +125,12 @@ export default class StorageInterface {
   }
   async getUserProfile(handle) {
     throw new Error("Method 'getUserProfile(handle)' must be implemented.");
+  }
+
+  async getProject() {
+    throw new Error("Method 'getProject()' must be implemented.");
+  }
+  async getProfile() {
+    throw new Error("Method 'getProfile()' must be implemented.");
   }
 }

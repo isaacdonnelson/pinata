@@ -2,6 +2,43 @@
   <div>
     <div class="text-left">
       <div>
+        <div class="mt-4">
+          <div
+            class="d-flex fs-14 mb-1 font-weight-medium"
+            :style="{ color: currentTheme.secondary }"
+          >
+            {{ $tc("caption.project", 1) }}
+          </div>
+          <v-select
+            v-model="selectedProject"
+            :items="projects"
+            class="project-select rounded-lg custom-select"
+            :label="$tc('caption.select_project', 1)"
+            item-text="name"
+            item-value="key"
+            style="width: 50%"
+            :background-color="inputBg"
+            :color="currentTheme.secondary"
+            append-icon="mdi-chevron-down"
+            :menu-props="{ offsetY: true }"
+            solo
+            flat
+            height="40px"
+            hide-details="true"
+            @change="handleProjectChange"
+          >
+            <template v-slot:selection="{ attr, on, item }">
+              <div class="project-item" v-bind="attr" v-on="on">
+                {{ item.name }}
+              </div>
+            </template>
+            <template v-slot:item="{ item }">
+              <div class="project-item">
+                {{ item.name }}
+              </div>
+            </template>
+          </v-select>
+        </div>
         <div>
           <div
             class="d-flex fs-14 mb-1 font-weight-medium"
@@ -478,6 +515,9 @@ export default {
       duration: "",
       privacy: "Private",
       privacy_modes: ["Private", "Public"],
+      projects: [],
+      selectedProject: null,
+      projectLoading: false,
     };
   },
   computed: {
@@ -562,13 +602,49 @@ export default {
       500
     );
   },
-  mounted() {
+  async mounted() {
     this.$root.$on("reset-duration", () => {
       this.duration = "";
     });
     this.duration = this.formatDuration(this.$store.state.case.duration);
+    await this.loadProjects();
   },
   methods: {
+    async loadProjects() {
+      try {
+        this.projectLoading = true;
+        const response = await this.$storageService.getProject();
+        this.projects = response.items || [];
+        this.selectedProject =
+          this.$store.state.user.currentAccount?.projectKey || null;
+      } catch (error) {
+        console.error("Error loading projects:", error);
+        this.$root.$emit(
+          "set-snackbar",
+          this.$tc("message.error_loading_projects", 1)
+        );
+      } finally {
+        this.projectLoading = false;
+      }
+    },
+    async handleProjectChange(projectKey) {
+      try {
+        const selectedProject = this.projects.find((p) => p.key === projectKey);
+        if (selectedProject) {
+          await this.$storageService.updateConfig({
+            ...this.config,
+            currentProject: selectedProject,
+          });
+          this.$store.commit("user/setCurrentProject", selectedProject);
+        }
+      } catch (error) {
+        console.error("Error updating project:", error);
+        this.$root.$emit(
+          "set-snackbar",
+          this.$tc("message.error_updating_project", 1)
+        );
+      }
+    },
     setHeading(editor, level) {
       if (level === 0) {
         editor.chain().focus().setParagraph().run();
@@ -782,7 +858,31 @@ export default {
   border-top-right-radius: 4px !important;
 }
 .mindmap-wrapper {
+  border: 1px solid #d1d5db;
+  border-top: none;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
+}
+.charter-tab .v-tab {
+  color: #667085 !important;
+}
+.charter-tab .v-tab.v-tab--active {
+  color: #0a26c3 !important;
+  border-bottom: solid 2px #0a26c3;
+}
+.charter-tab.theme--dark .v-tab.v-tab--active {
+  color: #fff !important;
+  border-bottom: solid 2px #fff;
+}
+.charter-tab {
+  border-bottom: solid 1px #eaecf0;
+}
+.project-select {
+  width: 50%;
+}
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>

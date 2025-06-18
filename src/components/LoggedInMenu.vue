@@ -67,9 +67,9 @@
           </v-list-item>
         </v-list>
 
-        <v-divider v-if="!this.$isElectron"></v-divider>
+        <v-divider v-if="!this.$isElectron && !disabledRoutes"></v-divider>
 
-        <v-list v-if="!this.$isElectron">
+        <v-list v-if="!this.$isElectron && !disabledRoutes">
           <v-list-item @click="logout">
             <v-list-item-icon>
               <v-icon>mdi-logout</v-icon>
@@ -95,6 +95,12 @@ export default {
     return {
       showMenu: false,
     };
+  },
+  props: {
+    disabledRoutes: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     ...mapGetters({

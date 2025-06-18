@@ -2,7 +2,7 @@ import Vue from "vue";
 export const config = {
   namespaced: true,
   state: () => ({
-    localOnly: false,
+    theme: false,
     appearance: "light",
     ai: {
       enabled: false,

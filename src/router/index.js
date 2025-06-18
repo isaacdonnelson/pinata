@@ -34,6 +34,7 @@ import ContinueWithSSOPage from "@/components/auth/views/NonExistingUserInvitePa
 import ExistingUserInvitePage from "@/components/auth/views/ExistingUserInvitePage.vue";
 import EmailConfirmationPage from "@/components/auth/views/EmailConfirmationPage.vue";
 import CreatePasswordPage from "@/components/auth/views/CreatePasswordPage.vue";
+import SetupPage from "@/components/auth/views/SetupPage.vue";
 
 Vue.use(VueRouter);
 
@@ -51,6 +52,11 @@ const routes = [
         path: "/register",
         name: "Register",
         component: RegisterPage,
+      },
+      {
+        path: "/setup",
+        name: "SetupPage",
+        component: SetupPage,
       },
       {
         path: "/forgot-password",
@@ -100,13 +106,13 @@ const routes = [
               // store.commit("setCurrentProject", { handle, projectKey });
             }
             if (store.getters["user/isAuthenticated"]) {
-              const storedConfig = store.getters["config/fullConfig"];
-              console.log("Stored Config:", storedConfig);
-              if (!storedConfig.uid) {
-                console.log("Creating new config...");
-                const config = store.dispatch("config/createConfig");
-                store.commit("config/setFullConfig", config);
-              }
+              // const storedConfig = store.getters["config/fullConfig"];
+              // console.log("Stored Config:", storedConfig);
+              // if (!storedConfig.uid) {
+              //   console.log("Creating new config...");
+              // const config = store.dispatch("config/createConfig");
+              // store.commit("config/setFullConfig", config);
+              // }
               next({ path: "/home" });
             } else {
               next({ path: "/login" });
@@ -263,6 +269,25 @@ router.beforeEach(async (to, from, next) => {
     return next({ path: "/home" });
   }
 
+  next();
+});
+
+// Global configuration check
+router.beforeEach(async (to, from, next) => {
+  const isAuthenticated = store.getters["user/isAuthenticated"];
+  if (isAuthenticated) {
+    const storedConfig = store.getters["config/fullConfig"];
+    if (!storedConfig.uid) {
+      console.log("Creating new config...");
+      try {
+        const config = await store.dispatch("config/createConfig");
+        store.commit("config/setFullConfig", config);
+      } catch (error) {
+        console.error("Failed to create config:", error);
+        return next({ path: "/login" }); // Redirect to login if config creation fails
+      }
+    }
+  }
   next();
 });
 
