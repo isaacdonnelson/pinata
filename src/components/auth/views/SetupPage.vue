@@ -175,9 +175,8 @@ export default {
       try {
         console.log("Polling projects for setup status...");
         const response = await this.$storageService.getProfile();
+
         if (response.setupStatus === "completed") {
-          stopPolling(this.pollInterval);
-          // if in electron set the config w/out an API call
           if (this.$isElectron) {
             this.$store.commit("config/setFullConfig", this.config);
           } else {
@@ -185,12 +184,13 @@ export default {
             this.$store.commit("config/setFullConfig", config);
           }
 
-          let dest;
-          dest = {
+          const dest = {
             name: "Home",
             params: { handle: this.currentAccount.handle },
           };
           this.$router.replace(dest);
+        } else {
+          console.warn("Setup status not completed.");
         }
       } catch (error) {
         console.error("Error polling projects:", error);

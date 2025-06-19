@@ -165,6 +165,10 @@ export default {
   margin-right: 16px;
 }
 
+.v-btn:before {
+  background-color: white !important;
+}
+
 .v-list-item__title {
   font-size: 14px;
   line-height: 20px;

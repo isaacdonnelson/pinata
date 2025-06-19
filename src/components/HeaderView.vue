@@ -91,16 +91,53 @@
             <div v-if="isAuthenticated">
               <LoggedInMenu :disabledRoutes="isDisabled" />
             </div>
-            <div v-else>
+            <div v-else class="d-flex align-center">
+              <v-btn
+                id="btn__setting"
+                class="mx-1"
+                fab
+                icon
+                small
+                depressed
+                color="default"
+                to="/settings"
+                retain-focus-on-click
+              >
+                <img
+                  :src="require('../../public/icon/gear.svg')"
+                  width="20"
+                  height="20"
+                />
+              </v-btn>
               <v-menu
-                :nudge-width="100"
+                v-model="showMenu"
+                :close-on-content-click="true"
                 bottom
-                z-index="99999"
                 offset-y
-                min-width="280px"
+                min-width="120px"
                 class="rounded-lg"
                 content-class="shadow-theme"
               >
+                <template v-slot:activator="{ on, attrs }">
+                  <div
+                    class="flex flex-row justify-center align-center cursor-pointer"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-avatar
+                      size="40"
+                      color="#f2f4f7"
+                      style="border: 1px solid #eaecf0"
+                    >
+                      <v-icon color="#bdbdbd">mdi-account</v-icon>
+                    </v-avatar>
+                  </div>
+                </template>
+                <v-list>
+                  <v-list-item @click="$router.push('/login')">
+                    <v-list-item-title>Login</v-list-item-title>
+                  </v-list-item>
+                </v-list>
               </v-menu>
             </div>
           </div>
@@ -255,6 +292,9 @@ export default {
   border: 1px solid rgb(12, 47, 243);
   color: #fff;
 }
+.v-btn:before {
+  background-color: white !important;
+}
 .v-tab.test-tab {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
@@ -266,6 +306,7 @@ export default {
 </style>
 <style>
 .shadow-theme {
-  box-shadow: 0px 16px 40px 0px rgba(0, 0, 0, 0.0588235294) !important;
+  /* box-shadow: 0px 16px 40px 0px rgba(0, 0, 0, 0.0588235294) !important; */
+  box-shadow: none !important;
 }
 </style>

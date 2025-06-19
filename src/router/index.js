@@ -28,12 +28,6 @@ import TagsTab from "@/components/settings/TagsTab.vue";
 // Auth Components
 import LoginPage from "@/components/auth/views/LoginPage.vue";
 import RegisterPage from "@/components/auth/views/RegisterPage.vue";
-import ForgotPasswordPage from "@/components/auth/views/ForgotPasswordPage.vue";
-import ResetPasswordPage from "@/components/auth/views/ResetPasswordPage.vue";
-import ContinueWithSSOPage from "@/components/auth/views/NonExistingUserInvitePage.vue";
-import ExistingUserInvitePage from "@/components/auth/views/ExistingUserInvitePage.vue";
-import EmailConfirmationPage from "@/components/auth/views/EmailConfirmationPage.vue";
-import CreatePasswordPage from "@/components/auth/views/CreatePasswordPage.vue";
 import SetupPage from "@/components/auth/views/SetupPage.vue";
 
 Vue.use(VueRouter);
@@ -61,37 +55,24 @@ const routes = [
       {
         path: "/forgot-password",
         name: "ForgotPassword",
-        component: ForgotPasswordPage,
-      },
-      {
-        path: "/reset-password",
-        name: "ResetPassword",
-        component: ResetPasswordPage,
-      },
-      {
-        path: "/invite/existing/:token",
-        name: "ExistingUserInvite",
-        component: ExistingUserInvitePage,
-      },
-      {
-        path: "/invite/:token",
-        name: "InvitationRegistration",
-        component: ContinueWithSSOPage,
-      },
-      {
-        path: "/email-confirmation",
-        name: "EmailConfirmation",
-        component: EmailConfirmationPage,
-      },
-      {
-        path: "/verify-email",
-        name: "VerifyEmail",
-        component: EmailConfirmationPage,
-      },
-      {
-        path: "/create-password",
-        name: "CreatePassword",
-        component: CreatePasswordPage,
+        beforeEnter: (to, from, next) => {
+          const isElectron = process.env.IS_ELECTRON === "true";
+          if (isElectron) {
+            const openInBrowser = confirm(
+              "This action requires a browser. Do you want to open it in your default browser?"
+            );
+            if (openInBrowser) {
+              // todo - workout in electron/vue
+              // require("electron").openExternal(
+              //   "https://app.testfiesta.com/forgotPassword"
+              // );
+            }
+          } else {
+            window.location.href = "https://app.testfiesta.com/forgotPassword";
+          }
+          // Prevent navigation to the route
+          next(false);
+        },
       },
       {
         path: "/auth/:handle/:projectKey",
@@ -106,13 +87,6 @@ const routes = [
               // store.commit("setCurrentProject", { handle, projectKey });
             }
             if (store.getters["user/isAuthenticated"]) {
-              // const storedConfig = store.getters["config/fullConfig"];
-              // console.log("Stored Config:", storedConfig);
-              // if (!storedConfig.uid) {
-              //   console.log("Creating new config...");
-              // const config = store.dispatch("config/createConfig");
-              // store.commit("config/setFullConfig", config);
-              // }
               next({ path: "/home" });
             } else {
               next({ path: "/login" });
@@ -233,40 +207,26 @@ const router = new VueRouter({
 // Authentication guard
 router.beforeEach(async (to, from, next) => {
   const isAuthenticated = store.getters["user/isAuthenticated"];
-  const authPages = [
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/reset-password",
-    "/invite",
-    "/email-confirmation",
-    "/verify-email",
-    "/create-password",
-  ];
 
-  // Handle root path - redirect to appropriate landing page if user is authenticated
+  // Default root path to /home
   if (to.path === "/") {
-    const targetPath = isAuthenticated ? "/home" : "/login";
-    if (to.path !== targetPath) {
-      return next({ path: targetPath });
-    }
-  }
-
-  // Block unauthenticated users from accessing protected routes
-  if (
-    !isAuthenticated &&
-    !authPages.some((route) => to.path.startsWith(route))
-  ) {
-    return next({ path: "/login" });
-  }
-
-  // Redirect authenticated users away from auth pages (login, register, etc..)
-  if (isAuthenticated && authPages.some((route) => to.path.startsWith(route))) {
-    // If there's a previous route and it's not an auth page, go back to it
-    if (from.path && !authPages.some((route) => from.path.startsWith(route))) {
-      return next({ path: from.path });
-    }
     return next({ path: "/home" });
+  }
+
+  // Block authenticated users from accessing login/register
+  if (isAuthenticated && ["/login", "/register", "/setup"].includes(to.path)) {
+    return next({ path: "/home" });
+  }
+
+  if (!isElectron) {
+    // Ensure user is authenticated for protected routes
+    if (
+      !isAuthenticated &&
+      !["/login", "/register", "/setup"].includes(to.path)
+    ) {
+      // TODO redirect back here after login
+      return window.location.replace("https://app.testfiesta.com/login");
+    }
   }
 
   next();
@@ -274,20 +234,6 @@ router.beforeEach(async (to, from, next) => {
 
 // Global configuration check
 router.beforeEach(async (to, from, next) => {
-  const isAuthenticated = store.getters["user/isAuthenticated"];
-  if (isAuthenticated) {
-    const storedConfig = store.getters["config/fullConfig"];
-    if (!storedConfig.uid) {
-      console.log("Creating new config...");
-      try {
-        const config = await store.dispatch("config/createConfig");
-        store.commit("config/setFullConfig", config);
-      } catch (error) {
-        console.error("Failed to create config:", error);
-        return next({ path: "/login" }); // Redirect to login if config creation fails
-      }
-    }
-  }
   next();
 });
 

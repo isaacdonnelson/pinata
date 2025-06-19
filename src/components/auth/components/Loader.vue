@@ -1,10 +1,26 @@
 <template>
   <div class="loader">
     <span class="loader-pieces-container">
-      <iconPlaceholder class="loader-piece-placeholder" />
-      <iconPiece0 class="loader-piece-0" />
-      <iconPiece1 class="loader-piece-1" />
-      <iconPiece2 class="loader-piece-2" />
+      <img
+        src="@/assets/icon/loader/loader-placeholder.svg"
+        alt="Loader Placeholder"
+        class="loader-piece-placeholder"
+      />
+      <img
+        src="@/assets/icon/loader/loader-piece-0.svg"
+        alt="Loader Piece 0"
+        class="loader-piece-0"
+      />
+      <img
+        src="@/assets/icon/loader/loader-piece-1.svg"
+        alt="Loader Piece 1"
+        class="loader-piece-1"
+      />
+      <img
+        src="@/assets/icon/loader/loader-piece-2.svg"
+        alt="Loader Piece 2"
+        class="loader-piece-2"
+      />
     </span>
     <div v-if="showLoadingText" class="message-container">
       <span
@@ -18,29 +34,13 @@
 </template>
 
 <script>
-import iconPlaceholder from "@/assets/icon/loader/loader-placeholder.svg";
-import iconPiece0 from "@/assets/icon/loader/loader-piece-0.svg";
-import iconPiece1 from "@/assets/icon/loader/loader-piece-1.svg";
-import iconPiece2 from "@/assets/icon/loader/loader-piece-2.svg";
-
 export default {
   name: "LoaderComponent",
-  components: {
-    iconPlaceholder,
-    iconPiece0,
-    iconPiece1,
-    iconPiece2,
-  },
   props: {
     showLoadingText: {
       type: Boolean,
       default: true,
     },
-  },
-  data() {
-    return {
-      messageIndex: 0,
-    };
   },
 };
 </script>

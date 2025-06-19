@@ -130,6 +130,7 @@ export default class StorageInterface {
   async getProject() {
     throw new Error("Method 'getProject()' must be implemented.");
   }
+
   async getProfile() {
     throw new Error("Method 'getProfile()' must be implemented.");
   }

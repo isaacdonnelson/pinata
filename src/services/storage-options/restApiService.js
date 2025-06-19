@@ -46,8 +46,8 @@ export default class RestApiService extends StorageInterface {
           localStorage.setItem("orgs", JSON.stringify(null));
 
           // Redirect to login
-          if (router.currentRoute.name !== "Login") {
-            router.push({ path: "/login" });
+          if (router.currentRoute.name !== "Home") {
+            router.push({ path: "/home" });
           }
         }
         return Promise.reject(error);

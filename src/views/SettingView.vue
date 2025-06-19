@@ -106,12 +106,16 @@ export default {
     return {
       activeTab: "/settings",
       tabs: [
-        {
-          id: 1,
-          name: this.$tc("caption.my_account", 1),
-          route: `/settings`,
-          component: MyAccountTab,
-        },
+        ...(this.isAuthenticated
+          ? [
+              {
+                id: 1,
+                name: this.$tc("caption.my_account", 1),
+                route: `/settings`,
+                component: MyAccountTab,
+              },
+            ]
+          : []),
         {
           id: 2,
           name: this.$tc("caption.general", 1),
