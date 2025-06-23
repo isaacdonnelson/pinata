@@ -4,12 +4,14 @@
       <div>
         <div class="mt-4">
           <div
+            v-if="!this.$isElectron"
             class="d-flex fs-14 mb-1 font-weight-medium"
             :style="{ color: currentTheme.secondary }"
           >
             {{ $tc("caption.project", 1) }}
           </div>
           <v-select
+            v-if="!this.$isElectron"
             v-model="selectedProject"
             :items="projects"
             class="project-select rounded-lg custom-select"
@@ -611,20 +613,22 @@ export default {
   },
   methods: {
     async loadProjects() {
-      try {
-        this.projectLoading = true;
-        const response = await this.$storageService.getProject();
-        this.projects = response.items || [];
-        this.selectedProject =
-          this.$store.state.user.currentAccount?.projectKey || null;
-      } catch (error) {
-        console.error("Error loading projects:", error);
-        this.$root.$emit(
-          "set-snackbar",
-          this.$tc("message.error_loading_projects", 1)
-        );
-      } finally {
-        this.projectLoading = false;
+      if (!this.$isElectron) {
+        try {
+          this.projectLoading = true;
+          const response = await this.$storageService.getProject();
+          this.projects = response.items || [];
+          this.selectedProject =
+            this.$store.state.user.currentAccount?.projectKey || null;
+        } catch (error) {
+          console.error("Error loading projects:", error);
+          this.$root.$emit(
+            "set-snackbar",
+            this.$tc("message.error_loading_projects", 1)
+          );
+        } finally {
+          this.projectLoading = false;
+        }
       }
     },
     async handleProjectChange(projectKey) {

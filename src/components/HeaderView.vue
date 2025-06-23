@@ -93,6 +93,7 @@
             </div>
             <div v-else class="d-flex align-center">
               <v-btn
+                v-if="!isDisabled"
                 id="btn__setting"
                 class="mx-1"
                 fab
@@ -101,7 +102,6 @@
                 depressed
                 color="default"
                 to="/settings"
-                retain-focus-on-click
               >
                 <img
                   :src="require('../../public/icon/gear.svg')"

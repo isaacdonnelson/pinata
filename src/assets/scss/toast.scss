@@ -1,0 +1,65 @@
+/* Custom styles for the toast */
+
+.custom-success-container {
+  width: 440px !important;
+  max-width: 440px !important;
+}
+
+.swal2-popup.colored-toast {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.swal2-title.custom-title-class {
+  font-weight: bold;
+  color: #344054;
+}
+
+.swal2-icon.custom-icon-class {
+  color: #12B76A;
+  /* Green checkmark color */
+}
+
+.swal2-timer-progress-bar.custom-timer-bar {
+  background: #0C2FF3;
+  /* Blue progress bar */
+}
+
+.swal2-cancel {
+  color: red !important;
+  background-color: white !important;
+  font-weight: bold;
+  margin: 0px !important;
+}
+
+.swal2-confirm {
+  color: blue !important;
+  background-color: white !important;
+  font-weight: bold;
+  margin: 0px !important;
+}
+
+.custom-footer {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 96px;
+}
+
+.custom-svg-icon {
+  display: flex;
+  vertical-align: middle;
+  width: 43px;
+  height: 43px;
+}
+
+.custom-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}

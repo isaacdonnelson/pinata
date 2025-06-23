@@ -2,6 +2,7 @@
   <div class="d-flex justify-space-between align-center">
     <div class="flex flex-row justify-center mr-5">
       <v-btn
+        v-if="!disabledRoutes"
         id="btn__setting"
         class="mx-1"
         fab

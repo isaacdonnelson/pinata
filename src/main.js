@@ -1,11 +1,12 @@
 import "./plugins/vee-validate";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 import Vue from "vue";
 import App from "./App.vue";
 import vuetify from "./plugins/vuetify";
 import VTiptap from "@yatt-ai/vuetify-tiptap";
 import router from "./router";
-import store from "./store";
+import store from "@/store/index";
 import integrationHelpers from "./integrations/IntegrationHelpers";
 import hotkeyHelpers from "./helpers/HotkeyHelpers";
 
@@ -18,6 +19,7 @@ import VueMask from "v-mask";
 import i18n from "./i18n";
 import StorageService from "./services/storageService";
 import ElectronService from "@/services/electronService";
+import VueSweetalert2 from "vue-sweetalert2";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -64,6 +66,8 @@ const plugins = {
     }
   },
 };
+
+Vue.use(VueSweetalert2);
 Vue.use(plugins);
 
 new Vue({

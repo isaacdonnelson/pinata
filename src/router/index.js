@@ -53,28 +53,6 @@ const routes = [
         component: SetupPage,
       },
       {
-        path: "/forgot-password",
-        name: "ForgotPassword",
-        beforeEnter: (to, from, next) => {
-          const isElectron = process.env.IS_ELECTRON === "true";
-          if (isElectron) {
-            const openInBrowser = confirm(
-              "This action requires a browser. Do you want to open it in your default browser?"
-            );
-            if (openInBrowser) {
-              // todo - workout in electron/vue
-              // require("electron").openExternal(
-              //   "https://app.testfiesta.com/forgotPassword"
-              // );
-            }
-          } else {
-            window.location.href = "https://app.testfiesta.com/forgotPassword";
-          }
-          // Prevent navigation to the route
-          next(false);
-        },
-      },
-      {
         path: "/auth/:handle/:projectKey",
         name: "Auth",
         props: true,
@@ -83,7 +61,7 @@ const routes = [
           try {
             await store.dispatch("user/getUserProfile");
             if (handle && projectKey) {
-              // todo: Uncomment and implement the logic to set the current project
+              // TODO: Uncomment and implement the logic to set the current project
               // store.commit("setCurrentProject", { handle, projectKey });
             }
             if (store.getters["user/isAuthenticated"]) {
@@ -216,17 +194,6 @@ router.beforeEach(async (to, from, next) => {
   // Block authenticated users from accessing login/register
   if (isAuthenticated && ["/login", "/register", "/setup"].includes(to.path)) {
     return next({ path: "/home" });
-  }
-
-  if (!isElectron) {
-    // Ensure user is authenticated for protected routes
-    if (
-      !isAuthenticated &&
-      !["/login", "/register", "/setup"].includes(to.path)
-    ) {
-      // TODO redirect back here after login
-      return window.location.replace("https://app.testfiesta.com/login");
-    }
   }
 
   next();

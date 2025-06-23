@@ -5,83 +5,68 @@
       <div class="content">
         <div class="login-wrapper pa-6">
           <div class="d-flex justify-center align-center mb-8">
-            <router-link to="/">
-              <img src="@/assets/logo.svg" alt="Pinata" height="32" />
-            </router-link>
+            <img src="@/assets/logo.svg" alt="Pinata" height="32" />
           </div>
 
-          <div class="text-center login-header mb-8">Log in</div>
+          <div class="text-center login-header mb-8">
+            {{ $t("auth.login.title") }}
+          </div>
           <!-- TODO: implement Google auth -->
-          <!-- <v-btn
-            v-if="!isElectron"
-            block
-            :color="btnBg"
-            class="mb-6 google-btn"
-            height="48"
-            @click="loginWithGoogle"
-          >
-            <img
-              src="@/assets/google-icon.svg"
-              class="mr-2"
-              height="18"
-              alt="Google"
-            />
-            <div class="btn-text fs-14">Log in with Google</div>
-          </v-btn>
-
-          <div class="divider mb-6">
-            <span class="divider-line"></span>
-            <span class="divider-text">Or continue with email</span>
-            <span class="divider-line"></span>
-          </div> -->
-
           <v-form ref="form" @submit.prevent="handleLogin">
             <div class="mb-2">
-              <label class="input-label">Email or username</label>
+              <v-label
+                class="text-left fs-14px text-theme-label font-weight-medium"
+              >
+                {{ $t("emailOrUsernameLabel") }}
+                <strong class="red--text text--lighten-1">*</strong>
+              </v-label>
               <v-text-field
                 v-model="loginInfo.email"
-                placeholder="Email or username"
-                outlined
-                dense
                 class="mb-4 auth-input"
                 :rules="emailOrUsernameValidation"
-                :error-messages="errors.email"
-                @input="clearError('email')"
-                autocomplete="username"
                 background-color="#f9fafb"
-                hide-details="auto"
+                id="username-field"
+                :placeholder="
+                  $t('inputPlaceholder', {
+                    field: $t('emailOrUsernamePlaceholder'),
+                  })
+                "
+                height="38"
+                :disabled="signinBtnLoading"
               />
             </div>
-
             <div class="mb-2">
-              <label class="input-label">Password</label>
+              <v-label
+                class="text-left fs-14px text-theme-label font-weight-medium"
+              >
+                {{ $t("passwordLabel") }}
+                <strong class="red--text text--lighten-1">*</strong>
+              </v-label>
               <v-text-field
+                id="password-field"
                 v-model="loginInfo.password"
-                placeholder="Password"
+                :placeholder="$t('inputPlaceholder', { field: $t('password') })"
+                height="38"
+                :rules="passwordValidation"
+                background-color="#F9F9FB"
+                class="mb-4 auth-input"
                 :type="visiblePassword ? 'text' : 'password'"
                 :append-icon="
                   visiblePassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
                 "
+                :disabled="signinBtnLoading"
                 @click:append="visiblePassword = !visiblePassword"
-                outlined
-                dense
-                class="mb-1 auth-input"
-                :rules="passwordValidation"
-                :error-messages="errors.password"
-                @input="clearError('password')"
-                autocomplete="current-password"
-                background-color="#f9fafb"
-                hide-details="auto"
               />
             </div>
 
             <div class="d-flex justify-start mb-6">
-              <router-link
-                to="/forgot-password"
+              <a
+                href="#"
+                @click.prevent="forgotPassword"
                 class="text-decoration-none forgot-password-link"
               >
-                Forgot your password?
-              </router-link>
+                {{ $t("forgotPassword") }}
+              </a>
             </div>
 
             <v-btn
@@ -92,16 +77,18 @@
               :loading="signinBtnLoading"
               class="mb-6 auth-btn login-btn"
             >
-              <span class="login-btn-text">Log in</span>
+              <span class="login-btn-text">{{ $t("auth.login.title") }} </span>
             </v-btn>
 
             <div class="text-center">
-              <span class="no-account-text">Don't have an account?</span>
+              <span class="no-account-text">{{
+                $t("auth.login.noAccount")
+              }}</span>
               <router-link
                 to="/register"
                 class="text-decoration-none signup-link ml-2"
               >
-                Sign up
+                {{ $t("auth.login.signUp") }}
               </router-link>
             </div>
           </v-form>
@@ -113,7 +100,7 @@
       {{ snackbar.message }}
       <template v-slot:action="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbar.show = false">
-          Close
+          {{ $t("common.close") }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -128,7 +115,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 
 import {
   emailOrUsernameValidationRules,
-  passwordValidationRules,
+  requiredFieldValidationRules,
 } from "@/utils/validation"; // Centralized validation rules
 
 export default {
@@ -162,10 +149,10 @@ export default {
       return window && window.process && window.process.type === "renderer";
     },
     emailOrUsernameValidation() {
-      return emailOrUsernameValidationRules(this); // Use centralized validation
+      return emailOrUsernameValidationRules(this);
     },
     passwordValidation() {
-      return passwordValidationRules(this); // Use centralized validation
+      return requiredFieldValidationRules(this);
     },
   },
   methods: {
@@ -183,36 +170,50 @@ export default {
             "user/loginUser",
             this.loginInfo
           );
+          console.log(response);
+          if (response.success) {
+            // Check for saved account preference
+            const savedAccount = this.getCurrentAccount();
+            let finalAccount = response.defaultAccount;
 
-          // Check for saved account preference
-          // TODO: handle org response - this is in place for when orgs are implemented in settings
-          const savedAccount = this.getCurrentAccount();
-          let finalAccount = response.defaultAccount;
-
-          if (savedAccount && response.orgs != undefined) {
-            const matchingOrg = response.orgs.find(
-              (org) => org.uid === savedAccount.uid
-            );
-            if (matchingOrg) {
-              finalAccount = matchingOrg;
+            if (savedAccount && response.orgs != undefined) {
+              const matchingOrg = response.orgs.find(
+                (org) => org.uid === savedAccount.uid
+              );
+              if (matchingOrg) {
+                finalAccount = matchingOrg;
+              }
             }
+
+            showSuccessToast(this.$swal, this.$t("loginSuccess"));
+
+            // Get the intended destination or default to home
+            this.$router.push({
+              name: "Home",
+              params: { handle: finalAccount.handle },
+            });
+          } else {
+            throw new Error(response.message || "Login failed");
           }
-
-          showSuccessToast(this.$swal, this.$t("loginSuccess"));
-
-          // Get the intended destination or default to home
-          this.$router.push({
-            name: "Home",
-            params: { handle: finalAccount.handle },
-          });
         } catch (error) {
+          console.log(this.$swal);
           showErrorToast(
             this.$swal,
-            error.response?.data?.error ?? this.$t("problemProcessingRequest")
+            error.response?.data?.error ??
+              this.$t("auth.messages.problemProcessingRequest")
           );
         } finally {
           this.signinBtnLoading = false;
         }
+      }
+    },
+
+    async forgotPassword() {
+      const testfiestaUrl = "https://app.testfiesta.com/forgotPassword";
+      if (this.$isElectron) {
+        await this.$electronService.openExternalLink(testfiestaUrl);
+      } else {
+        window.open(testfiestaUrl, "_blank");
       }
     },
   },
@@ -250,6 +251,16 @@ export default {
   max-width: 400px;
   background: #ffffff;
   border-radius: 12px;
+  margin-top: 10px;
+}
+
+.login-header {
+  font-family: Inter, sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 38px;
+  letter-spacing: 0;
+  color: #1a1a1a;
 }
 
 .google-btn {
@@ -311,10 +322,6 @@ export default {
   border: none !important;
 }
 
-.auth-input ::v-deep .v-text-field__details {
-  display: none;
-}
-
 .auth-input ::v-deep input {
   font-family: Inter, sans-serif;
   font-size: 16px;
@@ -330,85 +337,8 @@ export default {
   font-weight: 400;
   line-height: 24px;
   letter-spacing: 0;
+  border-radius: 8px !important;
   color: #6b7280;
-}
-
-.auth-input ::v-deep .v-input__append-inner {
-  margin-top: 10px !important;
-  padding: 0 12px;
-}
-
-.auth-input ::v-deep .v-icon {
-  font-size: 18px !important;
-  color: #6b7280 !important;
-}
-
-.auth-btn {
-  background-color: #0052ff !important;
-  border-radius: 8px;
-  text-transform: none;
-  font-weight: 500;
-  font-size: 16px;
-}
-
-.text-subtitle-1 {
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.primary--text {
-  color: #0052ff !important;
-}
-
-.fs-24 {
-  font-size: 24px;
-}
-
-.fs-14 {
-  font-size: 14px;
-}
-
-.theme--dark .v-tab {
-  border-color: #4b5563;
-}
-
-.workspace .theme--light.v-tabs .v-tabs-bar .v-tab--active,
-.workspace .theme--light.v-tabs .v-tabs-bar .v-tab:not(.v-tab--disabled) {
-  font-weight: bold;
-  border: 1px solid #0a26c3;
-}
-
-.workspace .theme--light.v-tabs .v-tabs-bar .v-tab--disabled,
-.workspace .theme--light.v-tabs .v-tabs-bar .v-tab:not(.v-tab--active) {
-  color: rgba(0, 0, 0, 0.54);
-  border: 1px solid #d1d5db;
-}
-
-.text-body-2 {
-  font-family: Inter, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  letter-spacing: 0;
-  color: #374151;
-}
-
-.login-header {
-  font-family: Inter, sans-serif;
-  font-size: 30px;
-  font-weight: 600;
-  line-height: 38px;
-  letter-spacing: 0;
-  color: #1a1a1a;
-}
-
-.forgot-password-link {
-  font-family: Inter, sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-  letter-spacing: 0;
-  color: #0052ff;
 }
 
 .login-btn {
@@ -426,7 +356,7 @@ export default {
   color: #ffffff;
 }
 
-.no-account-text {
+.account-text {
   font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -435,12 +365,42 @@ export default {
   color: #6b7280;
 }
 
-.signup-link {
+.forgot-password-link {
   font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
   letter-spacing: 0;
   color: #0052ff;
+}
+
+.password-requirements {
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  color: #6b7280;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  color: #ef4444; /* Red color for unmet requirements */
+}
+
+.requirement.met {
+  color: #22c55e; /* Green color for met requirements */
+}
+
+.requirement::before {
+  content: "•";
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.requirement.met::before {
+  content: "✓";
+  margin-right: 8px;
+  font-size: 14px;
 }
 </style>
