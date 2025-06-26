@@ -1,5 +1,6 @@
 import "./plugins/vee-validate";
 import "sweetalert2/dist/sweetalert2.min.css";
+import "./assets/scss/custom.scss";
 
 import Vue from "vue";
 import App from "./App.vue";

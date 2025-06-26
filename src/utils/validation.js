@@ -1,7 +1,6 @@
 import i18n from "@/i18n";
 
 export function emailValidationRules() {
-  console.log("init email. rule");
   /* eslint-disable no-control-regex */
   return [
     (v) => !!v || i18n.t("auth.messages.emailRequired"),

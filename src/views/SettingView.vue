@@ -106,16 +106,12 @@ export default {
     return {
       activeTab: "/settings",
       tabs: [
-        ...(this.isAuthenticated
-          ? [
-              {
-                id: 1,
-                name: this.$tc("caption.my_account", 1),
-                route: `/settings`,
-                component: MyAccountTab,
-              },
-            ]
-          : []),
+        {
+          id: 1,
+          name: this.$tc("caption.my_account", 1),
+          route: `/settings`,
+          component: MyAccountTab,
+        },
         {
           id: 2,
           name: this.$tc("caption.general", 1),
@@ -222,6 +218,7 @@ export default {
   border-radius: 15px;
   height: 100%;
   width: 12vw;
+  min-width: 130px;
 }
 .v-tab {
   font-size: 14px;

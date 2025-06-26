@@ -635,10 +635,6 @@ export default {
       try {
         const selectedProject = this.projects.find((p) => p.key === projectKey);
         if (selectedProject) {
-          await this.$storageService.updateConfig({
-            ...this.config,
-            currentProject: selectedProject,
-          });
           this.$store.commit("user/setCurrentProject", selectedProject);
         }
       } catch (error) {

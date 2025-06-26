@@ -139,7 +139,13 @@ export default {
         this.$store.commit("user/setOrgs", null);
         localStorage.removeItem("user");
         localStorage.removeItem("orgs");
-        this.$router.push("/login").catch(() => {});
+
+        const loginUrl =
+          process.env.VUE_APP_ENV === "production"
+            ? "https://testfiesta.com/login"
+            : "http://localhost:8084/login";
+
+        window.location.href = loginUrl;
       } catch (error) {
         console.error("Logout error:", error);
       }

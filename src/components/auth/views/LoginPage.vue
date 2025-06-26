@@ -100,7 +100,7 @@
       {{ snackbar.message }}
       <template v-slot:action="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbar.show = false">
-          {{ $t("common.close") }}
+          {{ $t("caption.close") }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -166,37 +166,13 @@ export default {
         this.signinBtnLoading = true;
 
         try {
-          const response = await this.$store.dispatch(
-            "user/loginUser",
-            this.loginInfo
-          );
-          console.log(response);
-          if (response.success) {
-            // Check for saved account preference
-            const savedAccount = this.getCurrentAccount();
-            let finalAccount = response.defaultAccount;
+          // log user in
+          await this.$store.dispatch("user/loginUser", this.loginInfo);
 
-            if (savedAccount && response.orgs != undefined) {
-              const matchingOrg = response.orgs.find(
-                (org) => org.uid === savedAccount.uid
-              );
-              if (matchingOrg) {
-                finalAccount = matchingOrg;
-              }
-            }
-
-            showSuccessToast(this.$swal, this.$t("loginSuccess"));
-
-            // Get the intended destination or default to home
-            this.$router.push({
-              name: "Home",
-              params: { handle: finalAccount.handle },
-            });
-          } else {
-            throw new Error(response.message || "Login failed");
-          }
+          showSuccessToast(this.$swal, this.$t("auth.messages.loginSuccess"));
+          // route to home page after log in
+          this.$router.replace("/home");
         } catch (error) {
-          console.log(this.$swal);
           showErrorToast(
             this.$swal,
             error.response?.data?.error ??
@@ -209,7 +185,10 @@ export default {
     },
 
     async forgotPassword() {
-      const testfiestaUrl = "https://app.testfiesta.com/forgotPassword";
+      const testfiestaUrl =
+        window.location.hostname === "localhost"
+          ? "http://localhost:8084/forgotPassword"
+          : "https://app.testfiesta.com/forgotPassword";
       if (this.$isElectron) {
         await this.$electronService.openExternalLink(testfiestaUrl);
       } else {
@@ -402,5 +381,23 @@ export default {
   content: "✓";
   margin-right: 8px;
   font-size: 14px;
+}
+
+.signup-link {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0;
+  color: #0052ff;
+}
+
+.no-account-text {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0;
+  color: #6b7280;
 }
 </style>

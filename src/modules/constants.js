@@ -25,8 +25,6 @@ export const IPC_FUNCTIONS = {
   DROP_FILE: "dropFile",
 
   SET_DEV_MODE: "setDevMode",
-  OPEN_SETTING_WINDOW: "openSettingWindow",
-  CLOSE_SETTING_WINDOW: "closeSettingWindow",
   OPEN_LOWPROFILE_WINDOW: "openLowProfileWindow",
   CLOSE_LOWPROFILE_WINDOW: "closeLowProfileWindow",
   CLOSE_SESSION_AND_MINIIMIZED_WINDOW: "closeSessionAndMinimizedWindow",

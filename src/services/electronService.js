@@ -7,9 +7,6 @@ import {
 export default class ElectronService {
   // Listeners
 
-  onOpenSettingWindow(callback) {
-    window.ipc.on("APP_SETTING", callback);
-  }
   onOpenAboutWindow(callback) {
     window.ipc.on("ABOUT_DIALOG", callback);
   }
@@ -77,12 +74,6 @@ export default class ElectronService {
         width,
         height,
       },
-    });
-  }
-
-  async openSettingWindow() {
-    return await window.ipc.invoke(IPC_HANDLERS.WINDOW, {
-      func: IPC_FUNCTIONS.OPEN_SETTING_WINDOW,
     });
   }
 

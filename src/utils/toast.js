@@ -3,6 +3,7 @@ import "@/assets/scss/toast.scss";
 import SwalSuccessIcon from "@/assets/icon/swal_success.svg";
 import SwalErrorIcon from "@/assets/icon/swal_error.svg";
 import store from "@/store";
+
 const getMessage = (key, variables) => {
   const messagePath = `toast.${key}`;
   const messageExists = i18n.te(messagePath);

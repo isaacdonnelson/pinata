@@ -194,7 +194,7 @@ export default {
       this.$root.$emit("start-quick-test");
     },
     async back() {
-      await this.$router.push("/");
+      await this.$router.push("/home");
       this.$store.commit("clearState");
     },
     handleResetConfirmDialog() {

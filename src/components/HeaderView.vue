@@ -16,7 +16,7 @@
         }"
       >
         <div class="d-flex align-center justify-start">
-          <component :is="isDisabled ? 'span' : 'router-link'" :to="logoRoute">
+          <component :is="isDisabled ? 'span' : 'router-link'" to="/home">
             <img :src="pinataLogo" alt="logo" draggable="false" />
           </component>
           <div class="tabs" style="display: none">
@@ -134,7 +134,7 @@
                   </div>
                 </template>
                 <v-list>
-                  <v-list-item @click="$router.push('/login')">
+                  <v-list-item @click="handleLogin">
                     <v-list-item-title>Login</v-list-item-title>
                   </v-list-item>
                 </v-list>
@@ -237,16 +237,23 @@ export default {
     endSession() {
       this.$emit("end-session");
     },
-    async openSettingsView() {
-      if (this.$router.history.current.path !== "/settings") {
-        await this.$router.push({ path: "/settings" });
-      }
-    },
     toggleSidebar() {
       this.sidebarActive = !this.sidebarActive;
     },
     setSidebarActive(value) {
       this.sidebarActive = !value;
+    },
+    handleLogin() {
+      const loginUrl =
+        window.location.hostname === "localhost"
+          ? "http://localhost:8084/login"
+          : "https://app.testfiesta.com/forgotPassword";
+
+      if (this.$isElectron) {
+        this.$router.push("/login");
+      } else {
+        window.location.href = loginUrl;
+      }
     },
   },
 };

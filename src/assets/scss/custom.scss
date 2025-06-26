@@ -1,0 +1,28 @@
+
+.swal-theme .custom-svg-icon {
+    margin-right: 0.5rem !important;
+  }
+  .swal-theme.custom-content {
+    justify-content: flex-start !important;
+  }
+  .swal2-popup.swal2-toast .swal2-html-container {
+    margin: .5em !important;
+  }
+  .swal2-toast.custom-success-popup, .swal2-toast.custom-error-popup {
+    min-height: 58px;
+    border-radius: 12px;
+    padding: 0px;
+    box-shadow: 0 0px 16px hsl(0deg 0% 0% / 0.095) !important;
+  }
+  .swal-theme .custom-message {
+    color: #0C111D !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+  .swal2-timer-progress-bar {
+    background: #0C2FF3;
+  }
+  
+  .swal2-actions {
+    justify-content: right !important;
+  }

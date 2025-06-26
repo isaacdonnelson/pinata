@@ -41,8 +41,8 @@ export default {
     },
     color: function (newValue, oldValue) {
       if (newValue === oldValue) return;
-      this.configToChange = structuredClone(this.config);
-      this.configToChange.colors[this.type + "Color"] = newValue;
+      this.localConfig = structuredClone(this.config);
+      this.localConfig.colors[this.type + "Color"] = newValue;
       this.handleConfig();
     },
   },
@@ -79,15 +79,15 @@ export default {
     return {
       type: this.colorType,
       colors: this.config?.colors,
-      configToChange: null,
+      localConfig: null,
       menu: false,
       color: "#1976D2FF",
     };
   },
   methods: {
     handleConfig() {
-      this.colors = this.configToChange.colors;
-      this.$storageService.updateConfig(this.configToChange);
+      this.colors = this.localConfig.colors;
+      this.$emit("submit-config", this.localConfig);
       this.$root.$emit("update-color-panel", this.color);
     },
   },

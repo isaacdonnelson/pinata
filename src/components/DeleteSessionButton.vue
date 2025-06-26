@@ -63,7 +63,7 @@ export default {
       const latestState = this.$store.state;
       await this.$storageService.resetData(latestState);
       this.$store.commit("clearState");
-      await this.$router.push("/");
+      await this.$router.push("/home");
     },
     updateStoreSession(isForce = false) {
       this.$store.commit("updateSession", {

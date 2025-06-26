@@ -28,7 +28,6 @@ import TagsTab from "@/components/settings/TagsTab.vue";
 // Auth Components
 import LoginPage from "@/components/auth/views/LoginPage.vue";
 import RegisterPage from "@/components/auth/views/RegisterPage.vue";
-import SetupPage from "@/components/auth/views/SetupPage.vue";
 
 Vue.use(VueRouter);
 
@@ -48,29 +47,38 @@ const routes = [
         component: RegisterPage,
       },
       {
-        path: "/setup",
-        name: "SetupPage",
-        component: SetupPage,
-      },
-      {
         path: "/auth/:handle/:projectKey",
         name: "Auth",
         props: true,
         beforeEnter: async (to, from, next) => {
           const { handle, projectKey } = to.params;
           try {
-            await store.dispatch("user/getUserProfile");
+            // get the user profile to check if the user is authorized via cookie
+            await store.dispatch("user/getUserProfile", handle);
+            // TODO set via backend, for now get the local config update it once the user changes it also check for an existing one
+            const config = store.getters["config/fullConfig"];
+            store.commit("config/setFullConfig", config);
             if (handle && projectKey) {
               // TODO: Uncomment and implement the logic to set the current project
               // store.commit("setCurrentProject", { handle, projectKey });
-            }
-            if (store.getters["user/isAuthenticated"]) {
+
               next({ path: "/home" });
-            } else {
-              next({ path: "/login" });
             }
           } catch {
-            next({ path: "/login" });
+            // if the endpoint fails then the user is not authorized and must login
+            const referrer = document.referrer;
+            if (
+              referrer.includes("testfiesta.com") ||
+              referrer.includes("localhost:8084")
+            ) {
+              window.location.href = referrer;
+            } else {
+              const loginUrl =
+                window.location.hostname === "localhost"
+                  ? "http://localhost:8084/login"
+                  : "https://app.testfiesta.com/login";
+              window.location.href = loginUrl;
+            }
           }
         },
       },
@@ -92,7 +100,7 @@ const routes = [
     component: SettingView,
     children: [
       {
-        path: "/",
+        path: "account",
         name: "myAccount",
         component: MyAccountTab,
         props: true,
@@ -184,6 +192,11 @@ const router = new VueRouter({
 
 // Authentication guard
 router.beforeEach(async (to, from, next) => {
+  // const loginUrl =
+  //   window.location.hostname === "localhost"
+  //     ? "http://localhost:8084/login"
+  //     : "https://app.testfiesta.com/forgotPassword";
+
   const isAuthenticated = store.getters["user/isAuthenticated"];
 
   // Default root path to /home
@@ -192,9 +205,13 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Block authenticated users from accessing login/register
-  if (isAuthenticated && ["/login", "/register", "/setup"].includes(to.path)) {
+  if (isAuthenticated && ["/login", "/register"].includes(to.path)) {
     return next({ path: "/home" });
   }
+
+  // if (!isAuthenticated && !process.env.IS_ELECTRON) {
+  //   return next((window.location.href = loginUrl));
+  // }
 
   next();
 });

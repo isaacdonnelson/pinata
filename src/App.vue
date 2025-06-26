@@ -41,7 +41,10 @@ export default {
         console.log("Session Clear : ", message);
       }
     }
-
+    if (this.$isElectron) {
+      const config = await this.$storageService.getConfig();
+      this.$store.commit("config/setFullConfig", config);
+    }
     // const credentials = await this.$storageService.getCredentials();
     // this.$store.commit("auth/setCredentials", credentials);
     // await this.updateAuth();
@@ -71,7 +74,7 @@ export default {
         ) {
           this.$electronService.setWindowSize({ width: 1440, height: 900 });
         }
-        if (this.stateToRestore.session.path !== "/login") {
+        if (this.stateToRestore.session.path !== "/authentication/signinJira") {
           await this.$router.push({ path: this.stateToRestore.session.path });
         }
       }

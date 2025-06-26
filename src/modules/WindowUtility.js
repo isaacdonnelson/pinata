@@ -2,7 +2,7 @@ const { app, BrowserWindow, screen } = require("electron");
 
 let isDevelopment = process.env.NODE_ENV !== "production";
 
-let settingsWin, modalWin;
+let modalWin;
 
 const browserUtility = require("./BrowserWindowUtility");
 const path = require("path");
@@ -109,54 +109,6 @@ module.exports.closeSessionAndLowProfiledWindow = (data) => {
   browserWindow.webContents.send(IPC_BIND_KEYS.END_SESSION, data.data);
   browserWindow.show();
   browserUtility.setViewMode(VIEW_MODE.NORMAL);
-};
-
-module.exports.openSettingWindow = () => {
-  const browserWindow = browserUtility.getBrowserWindow();
-  const url =
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:8080/#/settings"
-      : `file://${__dirname}/index.html#settings`;
-
-  if (!settingsWin) {
-    settingsWin = new BrowserWindow({
-      width: 800,
-      height: 600,
-      minWidth: 800,
-      minHeight: 600,
-      center: true,
-      parent: browserWindow,
-      // eslint-disable-next-line no-undef
-      icon: path.join(__static, "logo.png"),
-      webPreferences: {
-        devTools: true,
-        nodeIntegration: true,
-        webSecurity: false,
-        enableRemoteModule: true,
-        preload: path.join(app.getAppPath(), "preload.js"),
-      },
-    });
-
-    settingsWin.loadURL(url);
-    settingsWin.setMenuBarVisibility(false);
-
-    settingsWin.once("ready-to-show", () => {
-      if (isDevelopment) {
-        settingsWin.webContents.openDevTools();
-      }
-      settingsWin.show();
-      browserWindow.webContents.send("OPEN_CHILD_WINDOW");
-    });
-
-    settingsWin.on("close", () => {
-      browserWindow.webContents.send("CLOSE_CHILD_WINDOW", { data: "setting" });
-      settingsWin = null;
-    });
-  }
-};
-
-module.exports.closeSettingWindow = () => {
-  settingsWin.close();
 };
 
 module.exports.setWindowSize = ({ width, height }) => {

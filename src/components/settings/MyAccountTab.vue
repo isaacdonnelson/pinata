@@ -226,8 +226,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      config: "config/fullConfig",
       currentUser: "user/user",
+      isAuthenticated: "user/isAuthenticated",
     }),
 
     emailRules() {

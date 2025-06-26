@@ -1,3 +1,4 @@
+
 {
   "caption": {
     "update_profile": "Update profile",
@@ -452,7 +453,7 @@
     "client_secret": "Client Secret",
     "restart_session": "Restart session?",
     "delete_session": "Delete session?",
-    "restart_session_description": "All data related to the test sessions including photos, video, audio and other materials will be lost. Сontinue?",
+    "restart_session_description": "All data related to the test sessions including photos, video, audio and other materials will be lost. Continue?",
     "delete_account_warning": "Once you delete your account, there is no going back. Please be certain."
   },
   "emailOrUsernameLabel": "Email or username",
@@ -483,6 +484,7 @@
       "alreadyHaveAccount": "Already have an account?"
     },
     "messages": {
+      "loginSuccess": "Login success",
       "validPassword": "Password must be at least 6 characters long.",
       "passwordUppercase": "Password must contain at least one uppercase letter.",
       "emailRequired": "Email is required", 
@@ -507,21 +509,6 @@
       "tokenNameInvalidCharacters": "Access token names can only contain characters a-z, A-Z, 0-9, -, _, and ~.",
       "emailOrUsernameRequired": "Email or username is required",
       "problemProcessingRequest": "We are having problem processing your request."
-},
-    "success": {
-      "passwordReset": "Password reset successful!",
-      "registration": "Registration successful!",
-      "emailSent": "Email sent successfully!"
     }
-  },
-  "common": {
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close"
   }
 }

@@ -83,9 +83,6 @@ export default {
         }
       });
       this.$electronService.onOpenAboutWindow(this.openAboutDialog);
-      this.$electronService.onOpenSettingWindow(
-        this.$electronService.openSettingWindow
-      );
       this.$electronService.onSetTheme(this.setTheme);
     }
   },

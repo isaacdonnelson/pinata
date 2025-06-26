@@ -157,7 +157,7 @@
       {{ snackbar.message }}
       <template v-slot:action="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbar.show = false">
-          {{ $t("common.close") }}
+          {{ $t("caption.close") }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -251,10 +251,10 @@ export default {
             },
           });
 
-          // Show success message
+          const config = await this.$storageService.getConfig();
+          this.$store.commit("config/setFullConfig", config);
 
-          // Navigate to home regardless of config creation success
-          await this.$router.push({ path: "/setup" });
+          this.$router.replace("/home");
         } catch (error) {
           let errorMessage;
           if (Array.isArray(error.response?.data?.error)) {
@@ -274,28 +274,6 @@ export default {
     },
     signupWithGoogle() {
       // Implement Google signup logic
-    },
-    // TODO: add accept logic for invite etc.
-    // Check for invite token and organization in the URL parameters
-    checkForInvite(params) {
-      if (!params?.token || !params.org) return;
-
-      const inviteData = { handle: params.org, token: params.token };
-
-      this.$store
-        .dispatch("user/getInvite", inviteData)
-        .then((response) => {
-          if (response.data) {
-            this.invite = response.data;
-            this.$router.push({ name: "GetInvite", params: this.invite });
-          } else {
-            this.$router.push({ name: "RegisterPage" });
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching invite:", error);
-          this.$router.push({ name: "RegisterPage" });
-        });
     },
   },
 };
@@ -332,6 +310,7 @@ export default {
   max-width: 400px;
   background: #ffffff;
   border-radius: 12px;
+  margin-top: 10px;
 }
 
 .login-header {

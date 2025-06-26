@@ -50,10 +50,6 @@ ipcMain.handle(IPC_HANDLERS.WINDOW, async (event, args) => {
   switch (args.func) {
     case IPC_FUNCTIONS.SET_DEV_MODE:
       return windowUtility.setDevMode(args.data);
-    case IPC_FUNCTIONS.OPEN_SETTING_WINDOW:
-      return windowUtility.openSettingWindow(args.data);
-    case IPC_FUNCTIONS.CLOSE_SETTING_WINDOW:
-      return windowUtility.closeSettingWindow(args.data);
     case IPC_FUNCTIONS.OPEN_LOWPROFILE_WINDOW:
       return windowUtility.openLowProfileWindow(args.data);
     case IPC_FUNCTIONS.CLOSE_LOWPROFILE_WINDOW:
@@ -148,8 +144,6 @@ ipcMain.handle(IPC_HANDLERS.PERSISTENCE, async (event, args) => {
       return persistenceUtility.cleanupAttachments(args.data);
     case IPC_FUNCTIONS.GET_SIGNED_ATTACHMENT_URL:
       return persistenceUtility.getSignedAttachmentUrl(args.data);
-    case IPC_FUNCTIONS.GET_USER_PROFILE:
-      return persistenceUtility.getUserProfile(args.data);
     default:
       return null;
   }
