@@ -246,8 +246,8 @@ export default {
     handleLogin() {
       const loginUrl =
         window.location.hostname === "localhost"
-          ? "http://localhost:8084/login"
-          : "https://app.testfiesta.com/forgotPassword";
+          ? "http://localhost:8084/login?from=pinata"
+          : "https://app.testfiesta.com/login?from=pinata";
 
       if (this.$isElectron) {
         this.$router.push("/login");

@@ -142,8 +142,8 @@ export default {
 
         const loginUrl =
           process.env.VUE_APP_ENV === "production"
-            ? "https://testfiesta.com/login"
-            : "http://localhost:8084/login";
+            ? "https://testfiesta.com/login?from=pinata"
+            : "http://localhost:8084/login?from=pinata";
 
         window.location.href = loginUrl;
       } catch (error) {

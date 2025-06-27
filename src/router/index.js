@@ -51,19 +51,18 @@ const routes = [
         name: "Auth",
         props: true,
         beforeEnter: async (to, from, next) => {
-          const { handle, projectKey } = to.params;
+          const { handle } = to.params;
           try {
             // get the user profile to check if the user is authorized via cookie
             await store.dispatch("user/getUserProfile", handle);
             // TODO set via backend, for now get the local config update it once the user changes it also check for an existing one
             const config = store.getters["config/fullConfig"];
             store.commit("config/setFullConfig", config);
-            if (handle && projectKey) {
-              // TODO: Uncomment and implement the logic to set the current project
-              // store.commit("setCurrentProject", { handle, projectKey });
-
-              next({ path: "/home" });
-            }
+            // if (handle && projectKey) {
+            // TODO: Uncomment and implement the logic to set the current project
+            // store.commit("setCurrentProject", { handle, projectKey });
+            // }
+            next({ path: "/home" });
           } catch {
             // if the endpoint fails then the user is not authorized and must login
             const referrer = document.referrer;
@@ -77,6 +76,41 @@ const routes = [
                 window.location.hostname === "localhost"
                   ? "http://localhost:8084/login"
                   : "https://app.testfiesta.com/login";
+              window.location.href = loginUrl;
+            }
+          }
+        },
+      },
+      {
+        path: "/auth/:handle",
+        name: "Auth",
+        props: true,
+        beforeEnter: async (to, from, next) => {
+          const { handle, projectKey } = to.params;
+          try {
+            // get the user profile to check if the user is authorized via cookie
+            await store.dispatch("user/getUserProfile", handle);
+            // TODO set via backend, for now get the local config update it once the user changes it also check for an existing one
+            const config = store.getters["config/fullConfig"];
+            store.commit("config/setFullConfig", config);
+            // if (handle && projectKey) {
+            // TODO: Uncomment and implement the logic to set the current project
+            // store.commit("setCurrentProject", { handle, projectKey });
+            // }
+            next({ path: "/home" });
+          } catch {
+            // if the endpoint fails then the user is not authorized and must login
+            const referrer = document.referrer;
+            if (
+              referrer.includes("testfiesta.com") ||
+              referrer.includes("localhost:8084")
+            ) {
+              window.location.href = referrer;
+            } else {
+              const loginUrl =
+                window.location.hostname === "localhost"
+                  ? "http://localhost:8084/login?from=pinata"
+                  : "https://app.testfiesta.com/login?from=pinata";
               window.location.href = loginUrl;
             }
           }
@@ -192,12 +226,23 @@ const router = new VueRouter({
 
 // Authentication guard
 router.beforeEach(async (to, from, next) => {
-  // const loginUrl =
-  //   window.location.hostname === "localhost"
-  //     ? "http://localhost:8084/login"
-  //     : "https://app.testfiesta.com/forgotPassword";
+  const loginUrl =
+    process.env.VUE_APP_ENV === "production"
+      ? "https://testfiesta.com/login?from=pinata"
+      : "http://localhost:8084/login?from=pinata";
 
   const isAuthenticated = store.getters["user/isAuthenticated"];
+
+  // Allow /auth/:handle and /auth/:handle/:projectKey to run their own guards
+  if (
+    to.matched.some(
+      (record) =>
+        record.path === "/auth/:handle" ||
+        record.path === "/auth/:handle/:projectKey"
+    )
+  ) {
+    return next();
+  }
 
   // Default root path to /home
   if (to.path === "/") {
@@ -209,9 +254,10 @@ router.beforeEach(async (to, from, next) => {
     return next({ path: "/home" });
   }
 
-  // if (!isAuthenticated && !process.env.IS_ELECTRON) {
-  //   return next((window.location.href = loginUrl));
-  // }
+  // if not authenticated & in the web version then redirect to TF login
+  if (!isAuthenticated && !process.env.IS_ELECTRON) {
+    return next((window.location.href = loginUrl));
+  }
 
   next();
 });
