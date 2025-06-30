@@ -121,7 +121,7 @@
             class="rounded-lg custom-select"
             label="Select Test Run"
             item-text="name"
-            item-value="id"
+            item-value="uid"
             style="width: 50%"
             :background-color="inputBg"
             :color="currentTheme.secondary"
@@ -556,7 +556,6 @@ export default {
         this.projectLoading = true;
         const response = await this.$storageService.getProject();
         this.projects = response.items || [];
-        this.selectedProject = this.currentProject?.key || null;
       } catch (error) {
         console.error("Error loading projects:", error);
         this.$root.$emit(
@@ -570,8 +569,19 @@ export default {
 
     async loadTestRuns() {
       if (!this.selectedProject) return;
-      // TODO: Fetch test runs from backend based on selectedProject
-      this.testRuns = [];
+      try {
+        const response = await this.$storageService.getRunsByProject(
+          this.selectedProject
+        );
+        this.testRuns = response.items || [];
+      } catch (error) {
+        console.error("Error loading test runs:", error);
+        this.$root.$emit(
+          "set-snackbar",
+          this.$tc("message.error_loading_test_runs", 1)
+        );
+        this.testRuns = [];
+      }
     },
 
     async loadTestCases() {

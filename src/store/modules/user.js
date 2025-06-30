@@ -202,6 +202,8 @@ export const user = {
         const response = await this._vm.$storageService.getUserProfile();
         if (response && response.uid) {
           commit("setUser", response);
+          commit("setCurrentAccount", response);
+          commit("setAuthenticated", true);
           commit("setAuthenticated", true);
           return response;
         } else {

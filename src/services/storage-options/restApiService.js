@@ -195,4 +195,8 @@ export default class RestApiService extends StorageInterface {
   async getTestCasesByRun(projectKey, runId) {
     return this.stateService.getTestCasesByRun(projectKey, runId);
   }
+
+  async getRunsByProject(projectKey, handle) {
+    return this.stateService.getRunsByProject(projectKey, handle);
+  }
 }

@@ -200,4 +200,11 @@ export default class StateService extends StorageInterface {
     const response = await this.api.get(url);
     return response.data;
   }
+
+  async getRunsByProject(projectKey, handle) {
+    const orgHandle = handle || this.handle;
+    const url = `/${orgHandle}/projects/${projectKey}/runs`;
+    const response = await this.api.get(url);
+    return response.data;
+  }
 }

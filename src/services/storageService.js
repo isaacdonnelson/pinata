@@ -184,4 +184,8 @@ export default class StorageService {
   async getTestCasesByRun(projectKey, runId) {
     return await this.storage.getTestCasesByRun(projectKey, runId);
   }
+
+  async getRunsByProject(projectKey, handle) {
+    return await this.storage.getRunsByProject(projectKey, handle);
+  }
 }
