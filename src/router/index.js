@@ -86,7 +86,7 @@ const routes = [
         name: "Auth",
         props: true,
         beforeEnter: async (to, from, next) => {
-          const { handle, projectKey } = to.params;
+          const { handle } = to.params;
           try {
             // get the user profile to check if the user is authorized via cookie
             await store.dispatch("user/getUserProfile", handle);

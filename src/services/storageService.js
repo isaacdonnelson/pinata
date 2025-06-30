@@ -180,4 +180,8 @@ export default class StorageService {
   async getProfile() {
     return await this.storage.getProfile();
   }
+
+  async getTestCasesByRun(projectKey, runId) {
+    return await this.storage.getTestCasesByRun(projectKey, runId);
+  }
 }

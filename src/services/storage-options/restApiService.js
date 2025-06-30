@@ -58,7 +58,7 @@ export default class RestApiService extends StorageInterface {
     this.authService = new AuthService(this.api, this.userService);
     this.attachmentService = new AttachmentService(this.api);
     this.configService = new ConfigService(this.api);
-    this.projectsService = new ProjectsService(this.api);
+    this.projectsService = new ProjectsService(this.api, store);
   }
 
   // config endpoints
@@ -190,5 +190,9 @@ export default class RestApiService extends StorageInterface {
     // const url = `${this.baseURL}/${this.handle}/accessTokens`;
     // const response = await axios.get(url, { withCredentials: true });
     // return response;
+  }
+
+  async getTestCasesByRun(projectKey, runId) {
+    return this.stateService.getTestCasesByRun(projectKey, runId);
   }
 }

@@ -1,18 +1,13 @@
 import StorageInterface from "@/services/storageInterface";
-import store from "@/store";
-
 export default class ProjectService extends StorageInterface {
-  constructor(api) {
+  constructor(api, store) {
     super();
     this.api = api;
+    this.store = store;
   }
 
   get handle() {
-    return store.state.user.currentAccount?.handle;
-  }
-
-  get projectKey() {
-    return store.state.user.currentAccount?.projectKey;
+    return this.store.state.user.user.handle;
   }
 
   async getProject() {

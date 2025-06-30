@@ -47,6 +47,7 @@ const store = new Vuex.Store({
       started: "",
       ended: "",
       quickTest: false,
+      scriptedTest: false,
       path: "",
       isTargetForAll: true,
       remote: false,
@@ -111,6 +112,9 @@ const store = new Vuex.Store({
     },
     setSessionQuickTest(state, payload) {
       state.session.quickTest = payload;
+    },
+    setSessionScriptedTest(state, payload) {
+      state.session.scriptedTest = payload;
     },
     setSessionPath(state, payload) {
       state.session.path = payload;
@@ -204,6 +208,12 @@ const store = new Vuex.Store({
       if (state.session.quickTest !== payload.quickTest && payload.quickTest) {
         state.session.quickTest = payload.quickTest;
       }
+      if (
+        state.session.scriptedTest !== payload.scriptedTest &&
+        payload.scriptedTest
+      ) {
+        state.session.scriptedTest = payload.scriptedTest;
+      }
       if (state.session.sessionID !== payload.sessionID && payload.sessionID) {
         state.session.sessionID = payload.sessionID;
       }
@@ -241,6 +251,7 @@ const store = new Vuex.Store({
       state.session.started = "";
       state.session.ended = "";
       state.session.quickTest = false;
+      state.session.scriptedTest = false;
       state.session.remote = false;
       state.session.items = [];
 
@@ -276,6 +287,7 @@ const store = new Vuex.Store({
       state.session.started = "";
       state.session.ended = "";
       state.session.quickTest = true;
+      state.session.scriptedTest = false;
       state.session.remote = false;
       state.session.items = [];
       state.session.notes = {
@@ -359,6 +371,9 @@ const store = new Vuex.Store({
     },
     sessionQuickTest(state) {
       return state.session.quickTest;
+    },
+    sessionScriptedTest(state) {
+      return state.session.scriptedTest;
     },
     fullCase(state) {
       return state.case;

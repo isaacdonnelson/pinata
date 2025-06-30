@@ -18,7 +18,13 @@
             "
           >
             <QuickTestWrapper v-if="this.quickTest" />
-            <ExploratoryTestWrapper style="height: 100%" v-else />
+            <ExploratoryTestWrapper
+              style="height: 100%"
+              v-if="!this.quickTest && !this.scriptedTest"
+            />
+            <ScriptedSessionWrapper
+              v-if="!this.quickTest && this.scriptedTest"
+            />
             <CheckTaskWrapper
               v-if="showCheckList"
               :tasks="$store.state.session.preSessionTasks"
@@ -55,6 +61,7 @@ import QuickTestWrapper from "@/components/QuickTestWrapper.vue";
 import WorkspaceWrapper from "../components/WorkspaceWrapper.vue";
 import ControlPanel from "../components/ControlPanel.vue";
 import CheckTaskWrapper from "@/components/CheckTaskWrapper.vue";
+import ScriptedSessionWrapper from "@/components/ScriptedSessionWrapper.vue";
 import { SESSION_STATUSES } from "../modules/constants";
 import { mapGetters } from "vuex";
 
@@ -66,6 +73,7 @@ export default {
     WorkspaceWrapper,
     ControlPanel,
     CheckTaskWrapper,
+    ScriptedSessionWrapper,
     HeaderView: () => import("@/components/HeaderView.vue"),
   },
   data() {
@@ -119,6 +127,7 @@ export default {
       isAuthenticated: "user/isAuthenticated",
       credentials: "auth/credentials",
       quickTest: "sessionQuickTest",
+      scriptedTest: "sessionScriptedTest",
     }),
     presessionValid() {
       if (!this.checklistPresessionStatus) {

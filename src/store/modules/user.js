@@ -8,6 +8,7 @@ export const user = {
     invite: null,
     accounts: [],
     isAuthenticated: false,
+    currentProject: null,
   }),
   mutations: {
     // TODO - needed for pinata?
@@ -54,6 +55,9 @@ export const user = {
     },
     setCurrentAccount(state, currentAccount) {
       state.currentAccount = currentAccount;
+    },
+    setCurrentProject(state, currentProject) {
+      state.currentProject = currentProject;
     },
     emptyState(state) {
       state.user = null;
@@ -233,6 +237,9 @@ export const user = {
     },
     currentAccount(state) {
       return state?.currentAccount;
+    },
+    currentProject(state) {
+      return state?.currentProject;
     },
     user(state) {
       return state?.user;

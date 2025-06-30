@@ -54,6 +54,7 @@
             block
             height="40px"
             depressed
+            @click="handleScriptedSession"
           >
             <div
               class="btn-text fs-14"
@@ -386,6 +387,7 @@ export default {
     async newSession() {
       this.$store.commit("clearState");
       this.$store.commit("setSessionQuickTest", false);
+      this.$store.commit("setSessionScriptedTest", false);
       if (this.$router.history.current.path === "/home") {
         await this.$router.push("/main");
       }
@@ -412,9 +414,16 @@ export default {
     async handleQuickTest() {
       this.$store.commit("clearState");
       this.$store.commit("setSessionQuickTest", true);
+      this.$store.commit("setSessionScriptedTest", false);
       // if (this.$router.history.current.path === "/") {
       await this.$router.push("/main");
       // }
+    },
+    async handleScriptedSession() {
+      this.$store.commit("clearState");
+      this.$store.commit("setSessionQuickTest", false);
+      this.$store.commit("setSessionScriptedTest", true);
+      await this.$router.push("/main");
     },
   },
 };

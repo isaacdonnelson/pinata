@@ -194,4 +194,10 @@ export default class StateService extends StorageInterface {
       await this.api.delete(caseUrl);
     }
   }
+
+  async getTestCasesByRun(projectKey, runId) {
+    const url = `/${this.handle}/projects/${projectKey}/runs/${runId}/cases`;
+    const response = await this.api.get(url);
+    return response.data;
+  }
 }
